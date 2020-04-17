@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "es2019",
+        "lib": [
+            "es6",
+            "dom"
+        ],
+        "types": [
+            "node",
+            "reflect-metadata"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "outDir": "dist",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "resolveJsonModule": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "inlineSourceMap": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
