@@ -2,8 +2,12 @@ import { Client, Message } from "discord.js";
 import { inject, injectable } from "inversify";
 import { TYPES } from "./types";
 import { CommandHandler } from "./services/command-handler";
+
+import { HelpHandler } from "./services/commands/help";
 import { AboutHandler } from "./services/commands/about";
 import { PingFinder } from "./services/commands/ping-finder";
+
+import { StartGameHandler } from "./services/commands/game/start";
 
 @injectable()
 export class Bot {
@@ -25,8 +29,8 @@ export class Bot {
         this.registerHandler()
 
         this.client.on('message', (message: Message) => {
-            if (message.author.bot) {
-                console.debug('Ignoring bot message!')
+            if (message.author.bot || message.channel.type === 'dm') {
+                console.debug('Ignoring bot & dm message!')
                 return;
             }
 
@@ -45,7 +49,9 @@ export class Bot {
 
     private registerHandler()
     {
-        this.handler.addHandler(new AboutHandler);
-        this.handler.addHandler(new PingFinder);
+        this.handler.addHandler(new HelpHandler, this);
+        this.handler.addHandler(new AboutHandler, this);
+        this.handler.addHandler(new PingFinder, this);
+        this.handler.addHandler(new StartGameHandler, this);
     }
 }

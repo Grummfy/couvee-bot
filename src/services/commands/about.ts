@@ -12,8 +12,9 @@ export class AboutHandler extends CommandAbstract {
     public handle(message: Message): Promise<Message | Message[]> {
         let msg: string[] = [
             'I\'m a bot created by Grummfy',
-            'You can find me [online](https://github.com:Grummfy/couvee-bot.git) if you want to change me.',
-            'My license is AGPL v3',
+            'You can find me [online](https://github.com/Grummfy/couvee-bot.git) if you want to change me.',
+            'My license is [AGPL v3](https://raw.githubusercontent.com/Grummfy/couvee-bot/master/LICENSE)',
+            '',
             'This bot is an help for the rpg [La Couvée](http://editions-6napse.fr/#product-new-born)'
         ];
 

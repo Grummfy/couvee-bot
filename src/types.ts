@@ -4,5 +4,6 @@ export const TYPES = {
     Token: Symbol("Token"),
     PingFinder: Symbol("PingFinder"),
     CommandHandler: Symbol("CommandHandler"),
-    HelpHandler: Symbol("HelpHandler"),
+    DB_DSN: Symbol("DB_DSN"),
+    Store: Symbol("Store"),
 };

@@ -10,10 +10,15 @@
     "author": "Grummfy",
     "license": "AGPL-3.0",
     "dependencies": {
+        "@keyv/sqlite": "^2.0.2",
+        "@types/keyv": "^3.1.1",
+        "@types/lodash": "^4.14.149",
         "@types/node": "^13.11.1",
         "discord.js": "^12.2.0",
         "dotenv": "^8.2.0",
         "inversify": "^5.0.1",
+        "keyv": "^4.0.0",
+        "lodash": "^4.17.15",
         "reflect-metadata": "^0.1.13",
         "typescript": "^3.8.3"
     },

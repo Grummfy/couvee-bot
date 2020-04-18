@@ -1,4 +1,7 @@
 import { Message } from "discord.js";
+import { CommandHandler } from "../services/command-handler";
+import { GameManager } from "../services/game-manager";
+import { Bot } from "../bot";
 
 export interface Command {
     // the name of the command
@@ -12,4 +15,7 @@ export interface Command {
 
     // the handler of the command for the bot
     handle(message: Message): Promise<Message | Message[]>;
+
+    // indicate that the command is registred
+    registered(commandHandler: CommandHandler, gameManager: GameManager, bot: Bot);
 }

@@ -1,31 +1,42 @@
 import { Message } from "discord.js";
 import { Command } from "../contracts/Command";
-import { HelpHandler } from "./commands/help";
 import { injectable, inject } from "inversify";
+import { Store } from "./store";
+import { Bot } from "../bot";
+import { GameManager } from "./game-manager";
 import { TYPES } from "../types";
 
+/**
+ * Communication bus to dispach command alongs the bot
+ */
 @injectable()
 export class CommandHandler {
     private handlers: Array<Command>;
 
-    private helpHandlerCommand: HelpHandler;
+    private store: Store;
 
-    public constructor(@inject(TYPES.HelpHandler) helpHandler: HelpHandler) {
+    private gameManager: GameManager;
+
+    public constructor(
+        @inject(TYPES.Store) store: Store
+    ) {
         this.handlers = new Array();
-        this.helpHandlerCommand = helpHandler;
+        this.store = store;
+        this.gameManager = new GameManager(this.store);
     }
 
-    public addHandler(command: Command) {
+    public addHandler(command: Command, bot: Bot) {
         this.handlers.push(command);
+        command.registered(this, this.gameManager, bot);
     }
 
-    handle(message: Message): Promise<Message | Message[]> {
-        if (this.helpHandlerCommand.isHandled(message)) {
-            return this.helpHandlerCommand.showHelp(message, this.handlers);
-        }
+    public getHandlers(): Command[] {
+        return this.handlers;
+    }
 
+    public handle(message: Message): Promise<Message | Message[]> {
         for (let handler of this.handlers) {
-            console.log('Handled by: ' + handler.name);
+            console.debug('Handled by: ' + handler.name);
             if (handler.isHandled(message)) {
                 return handler.handle(message);
             }
