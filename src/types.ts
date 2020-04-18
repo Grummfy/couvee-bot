@@ -6,4 +6,5 @@ export const TYPES = {
     CommandHandler: Symbol("CommandHandler"),
     DB_DSN: Symbol("DB_DSN"),
     Store: Symbol("Store"),
+    Prefix: Symbol("Prefix"),
 };

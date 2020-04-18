@@ -41,4 +41,6 @@ or
 
 ## Note
 
-Freely inspired by https://www.toptal.com/typescript/dependency-injection-discord-bot-tutorial
+Helpfull ressources
+* https://discordjs.guide/
+* https://discord.js.org/#/docs/

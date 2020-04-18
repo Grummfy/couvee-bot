@@ -7,6 +7,7 @@ import { Bot } from "../bot";
 
 @injectable()
 export abstract class CommandAbstract implements Command {
+    public prefix: string
     public abstract name: string
     
     protected commandHandler: CommandHandler
@@ -14,11 +15,11 @@ export abstract class CommandAbstract implements Command {
     protected bot: Bot
 
     public help(): string {
-        return this.name + ' do something, but I\'m too lazy to document it!'
+        return this.prefix + this.name + ' do something, but I\'m too lazy to document it!'
     }
 
     public isHandled(message: Message): boolean {
-        return message.content.search(this.name) >= 0;
+        return message.content.search(this.prefix + this.name) >= 0;
     }
 
     public abstract handle(message: Message): Promise<Message | Message[]>;

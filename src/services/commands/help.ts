@@ -5,10 +5,10 @@ import { NiceMessage } from "../../helper/nice-message";
 
 @injectable()
 export class HelpHandler extends CommandAbstract {
-    public name = '#help';
+    public name = 'help';
 
     public help(): string {
-        return this.name + ' display help message ;)'
+        return this.prefix + this.name + ' display help message ;)'
     }
 
     public handle(message: Message): Promise<Message | Message[]> {

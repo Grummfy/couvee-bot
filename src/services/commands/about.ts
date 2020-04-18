@@ -3,10 +3,10 @@ import { CommandAbstract } from "../command-abstract";
 import { NiceMessage } from "../../helper/nice-message";
 
 export class AboutHandler extends CommandAbstract {
-    public name = '#about';
+    public name = 'about';
 
     public help(): string {
-        return this.name + ' some information about myself'
+        return this.prefix + this.name + ' some information about myself'
     }
 
     public handle(message: Message): Promise<Message | Message[]> {

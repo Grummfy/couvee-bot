@@ -9,6 +9,9 @@ import { PingFinder } from "./services/commands/ping-finder";
 
 import { StartGameHandler } from "./services/commands/game/start";
 
+/**
+ * Bopt class that handle the message and dispatch to command throught the command handler bus
+ */
 @injectable()
 export class Bot {
     private client: Client;
@@ -26,8 +29,15 @@ export class Bot {
     }
 
     public listen(): Promise<string> {
+        // register all the commands
         this.registerHandler()
 
+        // show help tips
+        this.client.on("ready", () => {
+            this.client.user.setActivity('La Couvée: ' + this.handler.getPrefix() + 'help')
+        })
+
+        // catch message event
         this.client.on('message', (message: Message) => {
             if (message.author.bot || message.channel.type === 'dm') {
                 console.debug('Ignoring bot & dm message!')
@@ -36,6 +46,7 @@ export class Bot {
 
             console.debug("Message received! Contents: ", message.content);
 
+            // send to bus
             this.handler.handle(message).then(() => {
                 console.debug("Response sent!");
             }).catch((error) => {

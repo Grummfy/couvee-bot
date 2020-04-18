@@ -7,6 +7,8 @@ export interface Command {
     // the name of the command
     name: string;
 
+    prefix: string;
+
     // give the string to match this help command
     help(): string;
 

@@ -11,36 +11,46 @@ import { TYPES } from "../types";
  */
 @injectable()
 export class CommandHandler {
-    private handlers: Array<Command>;
+    private handlers: Array<Command>
 
-    private store: Store;
+    private store: Store
 
-    private gameManager: GameManager;
+    private gameManager: GameManager
+
+    private prefix: string
 
     public constructor(
-        @inject(TYPES.Store) store: Store
+        @inject(TYPES.Store) store: Store,
+        @inject(TYPES.Prefix) prefix: string
     ) {
-        this.handlers = new Array();
-        this.store = store;
-        this.gameManager = new GameManager(this.store);
+        this.handlers = new Array()
+        this.store = store
+        this.gameManager = new GameManager(this.store)
+        this.prefix = prefix
     }
 
     public addHandler(command: Command, bot: Bot) {
-        this.handlers.push(command);
-        command.registered(this, this.gameManager, bot);
+        command.prefix = this.prefix
+        this.handlers.push(command)
+        command.registered(this, this.gameManager, bot)
     }
 
     public getHandlers(): Command[] {
-        return this.handlers;
+        return this.handlers
+    }
+
+    public getPrefix(): string {
+        return this.prefix
     }
 
     public handle(message: Message): Promise<Message | Message[]> {
+        // check all command handler and if it accept the command process it, and leave
         for (let handler of this.handlers) {
-            console.debug('Handled by: ' + handler.name);
             if (handler.isHandled(message)) {
-                return handler.handle(message);
+                console.debug('Handled by: ' + handler.name)
+                return handler.handle(message)
             }
         }
-        return Promise.reject();
+        return Promise.reject()
     }
 }

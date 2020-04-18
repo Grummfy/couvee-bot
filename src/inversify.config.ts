@@ -14,5 +14,6 @@ container.bind<string>(TYPES.Token).toConstantValue(process.env.TOKEN);
 container.bind<CommandHandler>(TYPES.CommandHandler).to(CommandHandler).inSingletonScope();
 container.bind<string>(TYPES.DB_DSN).toConstantValue(process.env.DB_DSN);
 container.bind<Store>(TYPES.Store).to(Store).inSingletonScope;
+container.bind<string>(TYPES.Prefix).toConstantValue(process.env.PREFIX);
 
 export default container;
