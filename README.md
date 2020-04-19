@@ -20,6 +20,8 @@
 
 This bot is developped in typescript. Mainly as an exercice.
 
+The minimum version of node required is 12
+
 ### Init
 
 * clone repository
@@ -50,3 +52,4 @@ Helpfull ressources
 * https://discord.js.org/#/docs/
 * https://github.com/AnIdiotsGuide/discordjs-bot-guide
 * https://discordapp.com/developers/docs/
+* https://leovoel.github.io/embed-visualizer/

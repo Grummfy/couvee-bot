@@ -17,19 +17,24 @@ export class SetHandler extends CommandAbstract {
     }
 
     public handle(message: Message): Promise<Message | Message[]> {
-        let regex = new RegExp('^' + this.prefix + this.name + ' (?<key>[a-zA-Z_]*) ?(?<value>[0-9]*) ?(?<user>.*)?$')
+        let regex = new RegExp('^' + this.prefix + this.name + ' (?<key>[a-zA-Z_]*) ?(?<value>[0-9]*) ?(?<user><@.([0-9]*)>)?$')
         let matched = message.content.match(regex)
-        console.debug(matched)
-        if (!matched) {
+
+        if (isNullOrUndefined(matched)) {
             return message.reply('mother eat you!')
+        }
+
+        let user: string;
+        if (!isNullOrUndefined(matched.groups.user)) {
+            user = matched.groups.user.trim().slice(3, -1)
         }
 
         switch (matched.groups.key) {
             case 'mind':
-                return this.setMind(Number.parseInt(matched.groups.value), matched.groups.user, message)
+                return this.setMind(Number.parseInt(matched.groups.value), user, message)
 
             case 'cci':
-                return this.setCCi(Number.parseInt(matched.groups.value), matched.groups.user, message)
+                return this.setCCi(Number.parseInt(matched.groups.value), user, message)
 
             case 'ccn':
                 return this.setCCn(Number.parseInt(matched.groups.value), message)
@@ -45,12 +50,9 @@ export class SetHandler extends CommandAbstract {
             return this.koMessage(message)
         }
 
-        let player = game.playerByUserId(isNullOrUndefined(userId) ? message.author.id : userId)
-        if (!player) {
+        if (!game.modifyDiceNumber('i', value, isNullOrUndefined(userId) ? message.author.id : userId)) {
             return this.koMessage(message)
         }
-
-        game.dices.players[ player.label ] = value
 
         // save value ;)
         this.gameManager.setGame(game)
@@ -64,7 +66,7 @@ export class SetHandler extends CommandAbstract {
             return this.koMessage(message)
         }
 
-        game.dices.neutral = value
+        game.modifyDiceNumber('n', value)
 
         // save value ;)
         this.gameManager.setGame(game)
@@ -84,7 +86,6 @@ export class SetHandler extends CommandAbstract {
         }
 
         player.mind = value
-        game.dices.players[ player.label ] = value
 
         // save value ;)
         this.gameManager.setGame(game)

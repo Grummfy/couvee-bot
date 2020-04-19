@@ -5,7 +5,7 @@ import { Player } from "../../../game/player"
 import { NiceMessage } from "../../../helper/nice-message"
 import * as _ from "lodash"
 import { isNullOrUndefined } from "util"
-import { Ok, Err, Result } from 'ts-results';
+import { Result } from "@badrap/result"
 
 /**
  * Command to start a game:
@@ -99,7 +99,7 @@ export class StartGameHandler extends CommandAbstract {
 
                     // check if everybody is selected => ask the cci
                     let result = this.checkAllPlayersAssociated(game, message)
-                    if (result.ok) {
+                    if (result.isOk) {
                         // cleanup
                         message.reactions.removeAll().catch(console.error)
 
@@ -115,12 +115,11 @@ export class StartGameHandler extends CommandAbstract {
                         message.channel
                             .send(
                                 NiceMessage.wrap(
-                                    'Please ' + msg.join(',') + '. Give me your CCI',
+                                    'Please ' + msg.join(',') + '. Give me your minde value for the CCi',
                                     NiceMessage.QUESTION
                                 )
                             )
                             .then(() => this.updateMindFromResponse(userIds, message, game));
-
                     }
                 });
 
@@ -134,6 +133,11 @@ export class StartGameHandler extends CommandAbstract {
 
                     // remove association
                     if (player) {
+                        // don't lose it
+                        if (isNullOrUndefined(game.players[player.label]) && !isNullOrUndefined(game.players[player.userId]) && game.players[player.userId].label == playerLabel) {
+                            game.players[player.label] = player
+                            delete game.players[player.userId]
+                        }
                         player.userId = undefined
                     }
                 });
@@ -141,11 +145,11 @@ export class StartGameHandler extends CommandAbstract {
                 collector.on('end', (collected: Collection<string, MessageReaction>, reason: string) => {
                     // check if all player are associate
                     let result = this.checkAllPlayersAssociated(game, message)
-                    if (result.ok) {
+                    if (result.isErr) {
                         message.channel.send(
                             NiceMessage.wrap(
                                 'It appears some players have not been choose "' +
-                                result.val.join(', ') + "\n" +
+                                result.error.val.join(', ') + "\n" +
                                 'Please restart the selection 😭',
                                 NiceMessage.ERROR
                             )
@@ -174,7 +178,7 @@ export class StartGameHandler extends CommandAbstract {
             // define the association with the player id
             player.userId = user.id
             // replace the key element
-            game.players[player.userId] = player.userId
+            game.players[player.userId] = player
             delete game.players[playerLabel]
         }
     }
@@ -209,7 +213,7 @@ export class StartGameHandler extends CommandAbstract {
             });
     }
 
-    private checkAllPlayersAssociated(game: Game, message: Message): Result<string[], string[]> {
+    private checkAllPlayersAssociated(game: Game, message: Message): Result<string[], ValueError<string[]>> {
         let undefinedPlayers: string[] = [];
         _.values(game.players).forEach((player: Player) => {
             if (isNullOrUndefined(player.userId)) {
@@ -218,10 +222,10 @@ export class StartGameHandler extends CommandAbstract {
         });
 
         if (undefinedPlayers.length > 0) {
-            return new Err(undefinedPlayers)
+            return Result.err(new ValueError(undefinedPlayers))
         }
         else {
-            return new Ok(undefinedPlayers)
+            return Result.ok(undefinedPlayers)
         }
     }
 
@@ -241,5 +245,13 @@ export class StartGameHandler extends CommandAbstract {
                 )
             );
         });
+    }
+}
+
+class ValueError<T> extends Error {
+    public val: T;
+    public constructor(val: T) {
+        super()
+        this.val = val
     }
 }

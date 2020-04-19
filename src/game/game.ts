@@ -38,9 +38,13 @@ export class Game implements Storable {
 
         if (type === 'i') {
             let player = this.playerByUserId(userId)
+            if (!player) {
+                return false
+            }
+
             let newValue = value + this.dices.players[player.label]
             // avoid overflow and going under 0
-            if (!player || newValue > player.mind || newValue < 0) {
+            if (newValue > player.mind || newValue < 0) {
                 return false
             }
 
