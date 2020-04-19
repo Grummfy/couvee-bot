@@ -38,4 +38,8 @@ export class NiceMessage {
             }
         }
     }
+
+    public static notify(userId: string): string {
+        return '<@' + userId + '>'
+    }
 }

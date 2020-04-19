@@ -62,6 +62,15 @@ export class Game implements Storable {
         }
     }
 
+    public availableDice(playersOnly: boolean): number {
+        let available = _.values<number>(this.dices.players).reduce((sum, value) => sum + value)
+        if (!playersOnly) {
+            available += this.dices.neutral
+        }
+
+        return available
+    }
+
     public toStorage(): object {
         let players = [];
         _.forIn(this.players, (player: Player) => players.push(player.toStorage()))

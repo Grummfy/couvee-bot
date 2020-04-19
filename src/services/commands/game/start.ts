@@ -107,7 +107,7 @@ export class StartGameHandler extends CommandAbstract {
                         let userIds = []
                         let msg = _.values(game.players).map((player: Player) => {
                             userIds.push(player.userId)
-                            return player.label + ': <@' + player.userId + '>'
+                            return player.label + ': ' + NiceMessage.notify(player.userId)
                         })
 
                         this.gameManager.setGame(game)
@@ -232,7 +232,7 @@ export class StartGameHandler extends CommandAbstract {
     private checkMultiplayerOnReactions(reaction: MessageReaction, message: Message): void {
         reaction.users.fetch().then((users: Collection<string, User>) => {
             let mentions = users.map((user: User) => {
-                return '<@' + user.id + '>';
+                return NiceMessage.notify(user.id);
             });
 
             message.channel.send(

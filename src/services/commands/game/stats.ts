@@ -12,19 +12,17 @@ export class StatGameHandler extends CommandAbstract {
             return message.reply('kO! mother wil eath you... grrr No game defined, start a new one with ' + this.prefix + 'start Xp')
         }
 
-        let sumDices = _.values<number>(game.dices.players).reduce((sum, value) => sum + value)
-
         let stats = new MessageEmbed()
         stats.setColor(NiceMessage.INFO)
         stats.setTitle('Stats about the CC')
         let fields = []
-        _.forIn(game.dices.players, (value: number, playerLabel: string) => {
+        _.forIn(game.dices.players, (value: number, playerLabel: string, arg) => {
             let player = game.playerByLabel(playerLabel)
-            fields.push('<@' + player.userId + '>: ' + value + '/' + player.mind)
+            fields.push(NiceMessage.notify(player.userId) + ': ' + value + '/' + player.mind)
         })
         stats.setDescription(fields.join("\n"))
         stats.addField('Neutral', game.dices.neutral, true)
-        stats.addField('Total', game.dices.neutral + sumDices, true)
+        stats.addField('Total', game.availableDice(false), true)
 
         return message.reply(stats)
     }
