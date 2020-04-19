@@ -22,6 +22,10 @@ export class Store {
         this.keyV.set(key, data);
     }
 
+    public remove(key: string) {
+        this.keyV.delete(key)
+    }
+
     public restore(key: string, storable: Storable): boolean {
         let data = this.keyV.get(key);
 

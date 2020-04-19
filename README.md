@@ -5,7 +5,6 @@
 * #help : display help, list of commands, etc
 * #start Xplayer : can be shorten Xp, start a new game with **X** player. If a game is running ask for confirmation before killing previous game.
 * #end : stop the current game
-* #cancel : cancel the last roll
 * launch dices: from your personal one (i), or the group (g) or neutral (n)
   * #r Xg+Yi+Z : launch **X** dice taken randomly from the cc**g**, **Y** from the cc**i**, **Z** from the bonus
   * #r Xg : launch **X** dice taken randomly from the cc**g** (group dice)
@@ -14,9 +13,14 @@
   * #r Xg+Yi : launch **Y** dice from the cc**i** then add **X** dice from the cc**g**
   * #r Xn+Yi : launch **Y** dice from the cc**i** then add **X** dice from the cc**g**
 * #add Xn : add **X** neutral dice
+* #remove Xn : remove **X** neutral dice
 * #stats : display the current stats about the dices
 
-## Init
+## Dev notes
+
+This bot is developped in typescript. Mainly as an exercice.
+
+### Init
 
 * clone repository
 * intall npm dependencies
@@ -29,18 +33,20 @@
   * use the url https://discordapp.com/oauth2/authorize?client_id=<CLIENT_ID>&scope=bot&permissions=8
   * choose your server
 
-## Compile
+### Compile
 
 ```npm run watch```
 
-## Launch
+### Launch
 
 ```node dist/server.js```
 or
 ```npm run start```
 
-## Note
+### Note
 
 Helpfull ressources
 * https://discordjs.guide/
 * https://discord.js.org/#/docs/
+* https://github.com/AnIdiotsGuide/discordjs-bot-guide
+* https://discordapp.com/developers/docs/

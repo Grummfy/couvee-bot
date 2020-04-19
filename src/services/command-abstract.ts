@@ -19,7 +19,7 @@ export abstract class CommandAbstract implements Command {
     }
 
     public isHandled(message: Message): boolean {
-        return message.content.search(this.prefix + this.name) >= 0;
+        return message.content.startsWith(this.prefix + this.name)
     }
 
     public abstract handle(message: Message): Promise<Message | Message[]>;

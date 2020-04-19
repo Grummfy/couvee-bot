@@ -1,24 +1,56 @@
 import { Player } from "./player";
 import { Storable } from "../contracts/Storable";
+import * as _ from "lodash"
+import { isNullOrUndefined } from "util";
 
 export class Game implements Storable {
     // server or guild id
     public guildId: string;
     // channel id
     public channelId: string;
-    // list of player
-    public players: Player[] = [];
+    // list of player (key userId, except at init where it's shitty)
+    public players = {};
     // the states of the dices
     public dices = {
+        // player by label instead of user id
         players: {},
         neutral: 0,
     };
 
+    public playerByUserId(userId: string): (Player|undefined) {
+        return this.players[ userId ]
+    }
+
+    public modifyDiceNumber(type: string, value: number, userId: string = undefined): boolean {
+        if (type === 'i' && isNullOrUndefined(userId)) {
+            return false
+        }
+
+        if (type === 'i') {
+            let player = this.playerByUserId(userId)
+            let newValue = value + this.dices.players[ player.label ]
+            // avoid overflow and going under 0
+            if (!player || newValue > player.mind || newValue < 0) {
+                return false
+            }
+
+            this.dices.players[ player.label ] = newValue
+        }
+
+        if (type === 'n') {
+            let newValue = value + this.dices.neutral
+            // avoid going under 0
+            if (newValue < 0) {
+                return false
+            }
+
+            this.dices.neutral = newValue
+        }
+    }
+
     public toStorage(): object {
         let players = [];
-        for (let player of this.players) {
-            players.push(player.toStorage());
-        }
+        _.forIn(this.players, (player: Player) => players.push(player.toStorage()))
 
         return {
             guildId: this.guildId,
@@ -31,7 +63,12 @@ export class Game implements Storable {
     public fromStorage(data) {
         this.guildId = data.guildId
         this.channelId = data.channelId
-        this.players = data.players
+        for (let row of _.values(data.players)) {
+            let player = new Player()
+            player.fromStorage(row)
+            this.players[ player.userId ] = player
+        }
+
         this.dices = data.dices
     }
 }

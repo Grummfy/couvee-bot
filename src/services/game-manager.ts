@@ -1,6 +1,7 @@
 import { Store } from "./store"
 import { Game } from "../game/game"
 import * as _ from "lodash"
+import { Message } from "discord.js"
 
 export class GameManager {
     private store: Store
@@ -8,6 +9,10 @@ export class GameManager {
 
     public constructor(store: Store) {
         this.store = store;
+    }
+
+    public getGameFromMessage(message: Message): Game {
+        return this.getGame(message.guild.id, message.channel.id)
     }
 
     public getGame(guildId: string, channelId: string): Game {
@@ -33,6 +38,12 @@ export class GameManager {
 
     public keyFromGame(game: Game): string {
         return this.keyFromIds(game.guildId, game.channelId);
+    }
+
+    public removeGame(game: Game) {
+        let key = this.keyFromGame(game)
+        delete this.games[key]
+        this.store.remove(key)
     }
 
     private keyFromIds(guildId: string, channelId: string): string {

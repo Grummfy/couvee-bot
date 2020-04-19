@@ -8,6 +8,12 @@ import { AboutHandler } from "./services/commands/about";
 import { PingFinder } from "./services/commands/ping-finder";
 
 import { StartGameHandler } from "./services/commands/game/start";
+import { SetHandler } from "./services/commands/game/set";
+import { EndGameHandler } from "./services/commands/game/end";
+import { RollGameHandler } from "./services/commands/game/roll";
+import { AddDiceHandler } from "./services/commands/game/add";
+import { RemoveDiceHandler } from "./services/commands/game/remove";
+import { StatGameHandler } from "./services/commands/game/stats";
 
 /**
  * Bopt class that handle the message and dispatch to command throught the command handler bus
@@ -31,6 +37,8 @@ export class Bot {
     public listen(): Promise<string> {
         // register all the commands
         this.registerHandler()
+
+        this.client.on('error', console.error);
 
         // show help tips
         this.client.on("ready", () => {
@@ -64,5 +72,11 @@ export class Bot {
         this.handler.addHandler(new AboutHandler, this);
         this.handler.addHandler(new PingFinder, this);
         this.handler.addHandler(new StartGameHandler, this);
+        this.handler.addHandler(new EndGameHandler, this);
+        this.handler.addHandler(new RollGameHandler, this);
+        this.handler.addHandler(new AddDiceHandler, this);
+        this.handler.addHandler(new RemoveDiceHandler, this);
+        this.handler.addHandler(new StatGameHandler, this);
+        this.handler.addHandler(new SetHandler, this);
     }
 }
