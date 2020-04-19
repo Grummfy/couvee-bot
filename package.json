@@ -23,12 +23,14 @@
         "url": "git+https://github.com/Grummfy/couvee-bot.git"
     },
     "dependencies": {
+        "@badrap/result": "^0.2.6",
         "@keyv/sqlite": "^2.0",
         "@types/keyv": "^3.1",
         "@types/lodash": "^4.14",
         "@types/node": "^13.11",
         "discord.js": "^12.2",
         "dotenv": "^8.2",
+        "install": "^0.13.0",
         "inversify": "^5.0",
         "keyv": "^4.0",
         "lodash": "^4.17",
@@ -46,6 +48,7 @@
     },
     "scripts": {
         "start": "node dist/server.js",
+        "debug": "node --inspect=0.0.0.0 dist/server.js",
         "watch": "tsc -p tsconfig.json -w",
         "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\""
     }

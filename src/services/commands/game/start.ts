@@ -5,6 +5,7 @@ import { Player } from "../../../game/player"
 import { NiceMessage } from "../../../helper/nice-message"
 import * as _ from "lodash"
 import { isNullOrUndefined } from "util"
+import { Ok, Err, Result } from 'ts-results';
 
 /**
  * Command to start a game:
@@ -51,10 +52,10 @@ export class StartGameHandler extends CommandAbstract {
             player.label = 'player' + i
 
             // we init with label ;)
-            game.players[ player.label ] = player
+            game.players[player.label] = player
 
             game.dices.neutral += 4
-            game.dices.players[ player.label ] = 0
+            game.dices.players[player.label] = 0
 
             let emojiValue = Number.parseInt('0x' + (valueStart++).toString(16))
             let emoji = String.fromCodePoint(emojiValue)
@@ -97,30 +98,30 @@ export class StartGameHandler extends CommandAbstract {
                     this.associatePlayerFromEmoji(reactions, reaction.emoji.name, game, user)
 
                     // check if everybody is selected => ask the cci
-                    this.checkAllPlayersAssociated(game, message)
-                        .then(() => {
-                            // cleanup
-                            message.reactions.removeAll().catch(console.error)
+                    let result = this.checkAllPlayersAssociated(game, message)
+                    if (result.ok) {
+                        // cleanup
+                        message.reactions.removeAll().catch(console.error)
 
-                            // ask to each player the cci
-                            let userIds = []
-                            let msg = _.values(game.players).map((player: Player) => {
-                                userIds.push(player.userId)
-                                return player.label + ': <@' + player.userId + '>'
-                            })
-
-                            this.gameManager.setGame(game)
-
-                            message.channel
-                                .send(
-                                    NiceMessage.wrap(
-                                        'Please ' + msg.join(',') + '. Give me your CCI',
-                                        NiceMessage.QUESTION
-                                    )
-                                )
-                                .then(() => this.updateMindFromResponse(userIds, message, game));
-
+                        // ask to each player the cci
+                        let userIds = []
+                        let msg = _.values(game.players).map((player: Player) => {
+                            userIds.push(player.userId)
+                            return player.label + ': <@' + player.userId + '>'
                         })
+
+                        this.gameManager.setGame(game)
+
+                        message.channel
+                            .send(
+                                NiceMessage.wrap(
+                                    'Please ' + msg.join(',') + '. Give me your CCI',
+                                    NiceMessage.QUESTION
+                                )
+                            )
+                            .then(() => this.updateMindFromResponse(userIds, message, game));
+
+                    }
                 });
 
                 // handle double click on a reaction
@@ -139,18 +140,18 @@ export class StartGameHandler extends CommandAbstract {
 
                 collector.on('end', (collected: Collection<string, MessageReaction>, reason: string) => {
                     // check if all player are associate
-                    this.checkAllPlayersAssociated(game, message)
-                        .catch((undefinedPlayers: string[]) => {
-                            message.channel.send(
-                                NiceMessage.wrap(
-                                    'It appears some players have not been choose "' +
-                                    undefinedPlayers.join(', ') + "\n" +
-                                    'Please restart the selection 😭',
-                                    NiceMessage.ERROR
-                                )
-                            );
-                            this.gameManager.removeGame(game);
-                        })
+                    let result = this.checkAllPlayersAssociated(game, message)
+                    if (result.ok) {
+                        message.channel.send(
+                            NiceMessage.wrap(
+                                'It appears some players have not been choose "' +
+                                result.val.join(', ') + "\n" +
+                                'Please restart the selection 😭',
+                                NiceMessage.ERROR
+                            )
+                        );
+                        this.gameManager.removeGame(game);
+                    }
 
                     // remove reaction, because they need to answer faster!!!!
                     message.reactions.removeAll()
@@ -173,12 +174,12 @@ export class StartGameHandler extends CommandAbstract {
             // define the association with the player id
             player.userId = user.id
             // replace the key element
-            game.players[ player.userId ] = player.userId
-            delete game.players[ playerLabel ]
+            game.players[player.userId] = player.userId
+            delete game.players[playerLabel]
         }
     }
 
-    private updateMindFromResponse(userIds: string[], message: Message, game: Game) {
+    private updateMindFromResponse(userIds: string[], message: Message, game: Game): void {
         // take all next response and update mind
         const filter = m => userIds.includes(m.author.id);
         message.channel.awaitMessages(filter, { time: 60000, max: userIds.length, errors: ['time'] })
@@ -208,7 +209,7 @@ export class StartGameHandler extends CommandAbstract {
             });
     }
 
-    private checkAllPlayersAssociated(game: Game, message: Message): Promise<string[]> {
+    private checkAllPlayersAssociated(game: Game, message: Message): Result<string[], string[]> {
         let undefinedPlayers: string[] = [];
         _.values(game.players).forEach((player: Player) => {
             if (isNullOrUndefined(player.userId)) {
@@ -216,17 +217,15 @@ export class StartGameHandler extends CommandAbstract {
             }
         });
 
-        return new Promise<string[]>((resolve, reject) => {
-            if (undefinedPlayers.length > 0) {
-                reject(undefinedPlayers)
-            }
-            else {
-                resolve(undefinedPlayers)
-            }
-        })
+        if (undefinedPlayers.length > 0) {
+            return new Err(undefinedPlayers)
+        }
+        else {
+            return new Ok(undefinedPlayers)
+        }
     }
 
-    private checkMultiplayerOnReactions(reaction: MessageReaction, message: Message) {
+    private checkMultiplayerOnReactions(reaction: MessageReaction, message: Message): void {
         reaction.users.fetch().then((users: Collection<string, User>) => {
             let mentions = users.map((user: User) => {
                 return '<@' + user.id + '>';

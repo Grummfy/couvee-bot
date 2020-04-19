@@ -7,10 +7,10 @@ export class RemoveDiceHandler extends AddDiceHandler {
         let values = super.extractValueOperations(matched, regex, userId);
 
         // because we remove data, we need to invert the values
-        for (let [index, value] of values) {
+        values.forEach((value, index) => {
             value.value = - value.value
             values[ index ] = value
-        }
+        });
 
         return values
     }

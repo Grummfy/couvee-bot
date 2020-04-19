@@ -27,6 +27,7 @@ export class Store {
     }
 
     public restore(key: string, storable: Storable): boolean {
+        // WXXX yeah a promise, welcome to hellllll
         let data = this.keyV.get(key);
 
         if (!data) {

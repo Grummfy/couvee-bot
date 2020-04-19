@@ -17,11 +17,15 @@ export class Game implements Storable {
         neutral: 0,
     };
 
-    public playerByUserId(userId: string): (Player|undefined) {
-        return this.players[ userId ]
+    public isValid(): boolean {
+        return !isNullOrUndefined(this.guildId) && !isNullOrUndefined(this.channelId);
     }
 
-    public playerByLabel(label: string): (Player|undefined) {
+    public playerByUserId(userId: string): (Player | undefined) {
+        return this.players[userId]
+    }
+
+    public playerByLabel(label: string): (Player | undefined) {
         return _.values<Player>(this.players)
             .filter((player: Player) => player.label === label)
             .shift()
@@ -34,13 +38,13 @@ export class Game implements Storable {
 
         if (type === 'i') {
             let player = this.playerByUserId(userId)
-            let newValue = value + this.dices.players[ player.label ]
+            let newValue = value + this.dices.players[player.label]
             // avoid overflow and going under 0
             if (!player || newValue > player.mind || newValue < 0) {
                 return false
             }
 
-            this.dices.players[ player.label ] = newValue
+            this.dices.players[player.label] = newValue
         }
 
         if (type === 'n') {
@@ -72,7 +76,7 @@ export class Game implements Storable {
         for (let row of _.values(data.players)) {
             let player = new Player()
             player.fromStorage(row)
-            this.players[ player.userId ] = player
+            this.players[player.userId] = player
         }
 
         this.dices = data.dices

@@ -20,14 +20,18 @@ export class GameManager {
         if (_.has(this.games, key)) {
             return this.games[key];
         }
+        
+        /*
 
         let game = new Game
         if (this.store.restore(key, game)) {
             this.games[key] = game;
-
         }
-
         return game;
+        // XXX well I don't want a promise here, so we are fuked ...
+        */
+
+        return undefined;
     }
 
     public setGame(game: Game) {
