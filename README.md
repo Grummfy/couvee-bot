@@ -47,9 +47,13 @@ or
 
 ### Note
 
-Helpfull ressources
+Some helpfull ressources
 * https://discordjs.guide/
 * https://discord.js.org/#/docs/
 * https://github.com/AnIdiotsGuide/discordjs-bot-guide
 * https://discordapp.com/developers/docs/
 * https://leovoel.github.io/embed-visualizer/
+
+if you want to host on heroku
+* https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/other-guides/heroku.md
+* https://devcenter.heroku.com/articles/procfile
