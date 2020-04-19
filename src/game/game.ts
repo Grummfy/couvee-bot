@@ -21,6 +21,12 @@ export class Game implements Storable {
         return this.players[ userId ]
     }
 
+    public playerByLabel(label: string): (Player|undefined) {
+        return _.values<Player>(this.players)
+            .filter((player: Player) => player.label === label)
+            .shift()
+    }
+
     public modifyDiceNumber(type: string, value: number, userId: string = undefined): boolean {
         if (type === 'i' && isNullOrUndefined(userId)) {
             return false
