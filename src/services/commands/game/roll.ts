@@ -46,7 +46,7 @@ export class RollGameHandler extends CommandAbstract {
         // get usefull stuff like game & current player
         let game = this.gameManager.getGameFromMessage(message)
         if (!game) {
-            return message.reply('kO! mother wil eath you... grrr No game defined, start a new one with ' + this.prefix + 'start Xp')
+            return message.reply('kO! mother wil eat you... grrr No game defined, start a new one with ' + this.prefix + 'start Xp')
         }
 
         let player = game.playerByUserId(message.author.id)
