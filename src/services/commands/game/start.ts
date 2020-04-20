@@ -104,22 +104,7 @@ export class StartGameHandler extends CommandAbstract {
                         message.reactions.removeAll().catch(console.error)
 
                         // ask to each player the cci
-                        let userIds = []
-                        let msg = _.values(game.players).map((player: Player) => {
-                            userIds.push(player.userId)
-                            return player.label + ': ' + NiceMessage.notify(player.userId)
-                        })
-
-                        this.gameManager.setGame(game)
-
-                        message.channel
-                            .send(
-                                NiceMessage.wrap(
-                                    'Please ' + msg.join(',') + '. Give me your minde value for the CCi',
-                                    NiceMessage.QUESTION
-                                )
-                            )
-                            .then(() => this.updateMindFromResponse(userIds, message, game));
+                        this.processMindValue(game, message)
                     }
                 });
 
@@ -174,6 +159,18 @@ export class StartGameHandler extends CommandAbstract {
         return reply;
     }
 
+    private processMindValue(game: Game, message: Message) {
+        let userIds = []
+        let msg = _.values(game.players).map((player: Player) => {
+            userIds.push(player.userId)
+            return player.label + ': ' + NiceMessage.notify(player.userId)
+        })
+        this.gameManager.setGame(game)
+        message.channel
+            .send(NiceMessage.wrap('Please ' + msg.join(',') + '. Give me your mind value for the CCi', NiceMessage.QUESTION))
+            .then(() => this.updateMindFromResponse(userIds, message, game))
+    }
+
     private associatePlayerFromEmoji(reactions: {}, emoji: string, game: Game, user: User) {
         // find player
         let playerLabel = reactions[emoji];
@@ -204,6 +201,7 @@ export class StartGameHandler extends CommandAbstract {
                     let player = game.playerByUserId(message.author.id)
                     if (player) {
                         player.mind = mind;
+                        game.modifyDiceNumber('i', mind, player.userId)
                     }
                     this.gameManager.setGame(game)
                 });
