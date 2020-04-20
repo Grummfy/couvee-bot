@@ -98,7 +98,7 @@ export class StartGameHandler extends CommandAbstract {
                     this.associatePlayerFromEmoji(reactions, reaction.emoji.name, game, user)
 
                     // check if everybody is selected => ask the cci
-                    let result = this.checkAllPlayersAssociated(game, message)
+                    let result = this.checkAllPlayersAssociated(game)
                     if (result.isOk) {
                         // cleanup
                         message.reactions.removeAll().catch(console.error)
@@ -136,24 +136,30 @@ export class StartGameHandler extends CommandAbstract {
                         // don't lose it
                         if (isNullOrUndefined(game.players[player.label]) && !isNullOrUndefined(game.players[player.userId]) && game.players[player.userId].label == playerLabel) {
                             game.players[player.label] = player
-                            delete game.players[player.userId]
+                            game.players[player.userId] = undefined
                         }
                         player.userId = undefined
                     }
                 });
 
-                collector.on('end', (collected: Collection<string, MessageReaction>, reason: string) => {
+                collector.on('end', () => {
                     // check if all player are associate
-                    let result = this.checkAllPlayersAssociated(game, message)
+                    let result = this.checkAllPlayersAssociated(game)
                     if (result.isErr) {
-                        message.channel.send(
-                            NiceMessage.wrap(
-                                'It appears some players have not been choose "' +
-                                result.error.val.join(', ') + "\n" +
-                                'Please restart the selection 😭',
+                        let msg = NiceMessage.wrap(
+                            'It appears some players have not been choose "' +
+                            result.error.val.join(', ') + "\n" +
+                            'Please restart the selection 😭',
+                            NiceMessage.ERROR
+                        )
+
+                        if (result.error.val.length == 0) {
+                            msg = NiceMessage.wrap(
+                                'Some nasty player take two, so you need to restart the selection 😭',
                                 NiceMessage.ERROR
                             )
-                        );
+                        }
+                        message.channel.send(msg);
                         this.gameManager.removeGame(game);
                     }
 
@@ -213,7 +219,7 @@ export class StartGameHandler extends CommandAbstract {
             });
     }
 
-    private checkAllPlayersAssociated(game: Game, message: Message): Result<string[], ValueError<string[]>> {
+    private checkAllPlayersAssociated(game: Game): Result<string[], ValueError<string[]>> {
         let undefinedPlayers: string[] = [];
         _.values(game.players).forEach((player: Player) => {
             if (isNullOrUndefined(player.userId)) {
@@ -225,6 +231,9 @@ export class StartGameHandler extends CommandAbstract {
             return Result.err(new ValueError(undefinedPlayers))
         }
         else {
+            if (!game.isReady()) {
+                return Result.err(new ValueError(undefinedPlayers))
+            }
             return Result.ok(undefinedPlayers)
         }
     }

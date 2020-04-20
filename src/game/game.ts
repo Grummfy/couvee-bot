@@ -21,6 +21,37 @@ export class Game implements Storable {
         return !isNullOrUndefined(this.guildId) && !isNullOrUndefined(this.channelId);
     }
 
+    public isReady(): boolean {
+        if (!this.isValid()) {
+            return false
+        }
+
+        let dead = false
+        _.forIn(this.players, (player: Player, userId: string) => {
+            if (dead) {
+                return
+            }
+
+            // check player is matched to userId
+            if (player.userId !== userId) {
+                dead = true
+                return
+            }
+
+            // check player exist in dice
+            if (!_.has(this.dices.players, player.label)) {
+                dead = true
+                return
+            }
+        })
+
+        if (_.values(this.dices.players).length !== _.values(this.players).length) {
+            dead = true
+        }
+
+        return !dead
+    }
+
     public playerByUserId(userId: string): (Player | undefined) {
         return this.players[userId]
     }
