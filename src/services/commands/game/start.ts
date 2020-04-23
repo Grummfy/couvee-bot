@@ -207,7 +207,7 @@ export class StartGameHandler extends CommandAbstract {
                     let player = game.playerByUserId(message.author.id)
                     if (player) {
                         player.mind = mind;
-                        game.modifyDiceNumber('i', mind, player.userId)
+                        game.modifyDiceNumber('i', mind, player.userId, true)
                     }
                     this.gameManager.setGame(game)
                 });

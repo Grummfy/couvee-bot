@@ -57,3 +57,4 @@ Some helpfull ressources
 if you want to host on heroku
 * https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/other-guides/heroku.md
 * https://devcenter.heroku.com/articles/procfile
+* https://devcenter.heroku.com/articles/dyno-metadata

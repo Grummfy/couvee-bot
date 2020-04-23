@@ -58,7 +58,7 @@ export class SetHandler extends CommandAbstract {
             return ErrorMessage.noGameInitilized(message)
         }
 
-        if (!game.modifyDiceNumber('i', value, isNullOrUndefined(userId) ? message.author.id : userId)) {
+        if (!game.modifyDiceNumber('i', value, isNullOrUndefined(userId) ? message.author.id : userId, true)) {
             return this.koMessage(message)
         }
 
@@ -74,7 +74,7 @@ export class SetHandler extends CommandAbstract {
             return ErrorMessage.noGameInitilized(message)
         }
 
-        game.modifyDiceNumber('n', value)
+        game.modifyDiceNumber('n', value, undefined, true)
 
         // save value ;)
         this.gameManager.setGame(game)

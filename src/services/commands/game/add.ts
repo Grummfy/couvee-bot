@@ -27,7 +27,7 @@ export class AddDiceHandler extends CommandAbstract {
 
         // handle game change
         for (let value of result.unwrap()) {
-            game.modifyDiceNumber(value.type, value.value, value.userId)
+            game.modifyDiceNumber(value.type, value.value, value.userId, false)
         }
         this.gameManager.setGame(game)
 

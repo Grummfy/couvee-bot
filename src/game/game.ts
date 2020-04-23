@@ -62,7 +62,7 @@ export class Game implements Storable {
             .shift()
     }
 
-    public modifyDiceNumber(type: string, value: number, userId: string = undefined): boolean {
+    public modifyDiceNumber(type: string, value: number, userId: string = undefined, set: boolean): boolean {
         if (type === 'i' && isNullOrUndefined(userId)) {
             return false
         }
@@ -73,7 +73,7 @@ export class Game implements Storable {
                 return false
             }
 
-            let newValue = value + this.dices.players[player.label]
+            let newValue = set ? value  : (value + this.dices.players[player.label])
             // avoid overflow and going under 0
             if (newValue > player.mind || newValue < 0) {
                 return false
@@ -91,6 +91,8 @@ export class Game implements Storable {
 
             this.dices.neutral = newValue
         }
+
+        return true
     }
 
     public availableDice(playersOnly: boolean): number {
