@@ -32,7 +32,7 @@ export class StartGameHandler extends CommandAbstract {
         let reactions = {}
         let valueStart = "😁".codePointAt(0)
         if (!matched) {
-            return message.reply('arghhhhhh')
+            return message.reply('arghhhhhh....' + "\n\n" + this.help())
         }
 
         if (matched.groups.player1) {
