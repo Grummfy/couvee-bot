@@ -2,15 +2,22 @@ import { Message } from "discord.js"
 import { CommandAbstract } from "../../command-abstract"
 import { isNullOrUndefined } from "util"
 import { Result } from "@badrap/result"
+import { ErrorMessage } from "../../../helper/error-message"
 
 export class AddDiceHandler extends CommandAbstract {
     public name = 'add'
 
+    public help(): string {
+        return '**' + this.prefix + this.name + '** will add some dice in the pool:' + "\n"
+        + '• *X i @Y*: X is the number of character dice of player Y(@username) to re-add (within the limit of availibilities)' + "\n"
+        + '• *X i*: X is the number of character dice of yourself to re-add (within the limit of availibilities)' + "\n"
+        + '• *X n*: X is the number of neutral dice to put in the pool of dices' + "\n"
+    }
+
     public handle(message: Message): Promise<Message | Message[]> {
         let game = this.gameManager.getGameFromMessage(message)
         if (!game) {
-            // TODO error
-            return message.reply('Arghhh');
+            return ErrorMessage.noGameInitilized(message)
         }
 
         let result = this.extractValues(message)

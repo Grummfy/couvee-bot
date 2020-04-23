@@ -8,7 +8,7 @@ export class HelpHandler extends CommandAbstract {
     public name = 'help';
 
     public help(): string {
-        return this.prefix + this.name + ' display help message ;)'
+        return '**' + this.prefix + this.name + '** display help message ;)'
     }
 
     public handle(message: Message): Promise<Message | Message[]> {

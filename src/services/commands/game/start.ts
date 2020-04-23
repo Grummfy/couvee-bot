@@ -17,6 +17,12 @@ import { Result } from "@badrap/result"
 export class StartGameHandler extends CommandAbstract {
     public name = 'start'
 
+    public help(): string {
+        return '**' + this.prefix + this.name + ' Xplayer** start the game for X players.' + "\n"
+        + 'Once started, each player must choose one smiley from the available reactions.' + "\n"
+        + 'Then the bot will ask for the mind value of each of them.' + "\n"
+    }
+
     public handle(message: Message): Promise<Message | Message[]> {
         // get the number of player in the game
         let regex = new RegExp('^' + this.prefix + this.name + ' ((p|player) ?(?<player1>[0-9]*)|(?<player2>[0-9]*) ?(p|player))$')

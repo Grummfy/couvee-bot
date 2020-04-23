@@ -9,6 +9,7 @@ import { Game } from "../../../game/game";
 import { Player } from "../../../game/player";
 import { Result } from "@badrap/result";
 import { NiceMessage } from "../../../helper/nice-message";
+import { ErrorMessage } from "../../../helper/error-message";
 
 export class RollGameHandler extends CommandAbstract {
     public name = 'roll'
@@ -38,6 +39,16 @@ export class RollGameHandler extends CommandAbstract {
         this.randomEngine = container.get<Engine>(TYPES.RandomEngine)
     }
 
+    public help(): string {
+        return '**' + this.prefix + this.name + '** will roll some dices, you can combine several possibilities:' + "\n"
+        + '• *X*: roll X neutral dice that are bonus dices' + "\n"
+        + '• *Xg*: roll X random dice taken randomly from the pool of the group' + "\n"
+        + '• *Xn*: roll X neutral dice taken randomly from the pool of the group' + "\n"
+        + '• *Xi*: roll X dice taken from the pool of the group, but only yours (if not enought, will take some ranom dice)' + "\n"
+        + '• *Xg+Yi+Zn+A*: roll X random dice from the pool, Y individual dice, Z neutral dice and A bonus dices' + "\n"
+        + 'When some kind of dice are not available, it will take some randomly... hehe' + "\n"
+    }
+
     public isHandled(message: Message): boolean {
         return super.isHandled(message) || message.content.startsWith(this.prefix + this.name[0] + ' ')
     }
@@ -46,12 +57,12 @@ export class RollGameHandler extends CommandAbstract {
         // get usefull stuff like game & current player
         let game = this.gameManager.getGameFromMessage(message)
         if (!game) {
-            return message.reply('kO! mother wil eat you... grrr No game defined, start a new one with ' + this.prefix + 'start Xp')
+            return ErrorMessage.noGameInitilized(message)
         }
 
         let player = game.playerByUserId(message.author.id)
         if (!player) {
-            return message.reply('argh')
+            return ErrorMessage.noPlayerFound(message)
         }
 
         //

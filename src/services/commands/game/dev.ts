@@ -7,6 +7,10 @@ import { Player } from "../../../game/player";
 export class DevHandler extends CommandAbstract {
     public name = 'dev'
 
+    public help(): string {
+        return this.prefix + this.name + ' Don\'t use this...'
+    }
+
     public handle(message: Message): Promise<Message | Message[]> {
         let game = new Game()
         game.dices.players['player1'] = 5

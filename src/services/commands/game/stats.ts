@@ -2,14 +2,19 @@ import { Message, MessageEmbed } from "discord.js"
 import { CommandAbstract } from "../../command-abstract"
 import { NiceMessage } from "../../../helper/nice-message";
 import * as _ from "lodash"
+import { ErrorMessage } from "../../../helper/error-message";
 
 export class StatGameHandler extends CommandAbstract {
     public name = 'stats'
 
+    public help(): string {
+        return '**' + this.prefix + this.name + '** give the actual stats about the number of dice available for each player'
+    }
+
     public handle(message: Message): Promise<Message | Message[]> {
         let game = this.gameManager.getGameFromMessage(message)
         if (!game) {
-            return message.reply('kO! mother wil eat you... grrr No game defined, start a new one with ' + this.prefix + 'start Xp')
+            return ErrorMessage.noGameInitilized(message)
         }
 
         let stats = new MessageEmbed()
