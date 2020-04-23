@@ -83,7 +83,7 @@ export class Game implements Storable {
         }
 
         if (type === 'n') {
-            let newValue = value + this.dices.neutral
+            let newValue = set ? value : value + this.dices.neutral
             // avoid going under 0
             if (newValue < 0) {
                 return false
