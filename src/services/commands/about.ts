@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { CommandAbstract } from "../command-abstract";
 import { NiceMessage } from "../../helper/nice-message";
+import { isNullOrUndefined } from "util";
 
 export class AboutHandler extends CommandAbstract {
     public name = 'about';
@@ -17,6 +18,11 @@ export class AboutHandler extends CommandAbstract {
             '',
             'This bot is an help for the rpg [La Couvée](http://editions-6napse.fr/#product-new-born)'
         ];
+
+        if (!isNullOrUndefined(process.env.HEROKU_RELEASE_VERSION)) {
+            msg.push('')
+            msg.push('Version: ' + process.env.HEROKU_RELEASE_VERSION)
+        }
 
         return message.reply(NiceMessage.wrap(msg.join("\n")));
     }
