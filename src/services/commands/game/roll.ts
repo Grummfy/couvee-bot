@@ -63,12 +63,13 @@ export class RollGameHandler extends CommandAbstract {
         let requestedDiceToRoll = requestedDicesToRoll.unwrap()
 
         let msg = 'you ask for some dices: '
-        msg += requestedDiceToRoll.dices.n + ' neutral dice, '
-        msg += requestedDiceToRoll.dices.g + ' group dice, '
+        msg += '***' + requestedDiceToRoll.bonus + '*** bonus dice added, '
+        msg += '**' + requestedDiceToRoll.dices.n + '** neutral dice, '
+        msg += '**' + requestedDiceToRoll.dices.g + '** group dice, '
 
         _.forIn(requestedDiceToRoll.dices.i, (value: number, playerLabel: string) => {
             let playerOfDice = game.playerByLabel(playerLabel)
-            msg += requestedDiceToRoll.dices.i[ playerLabel ] + ' dice from ' + NiceMessage.notify(playerOfDice.userId) + ', '
+            msg += '**' + requestedDiceToRoll.dices.i[ playerLabel ] + '** dice from ' + NiceMessage.notify(playerOfDice.userId) + ', '
         })
 
         message.reply(msg.slice(0, -2));
