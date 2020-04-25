@@ -1,24 +1,25 @@
-import { Player } from "./player";
-import { Storable } from "../contracts/Storable";
-import * as _ from "lodash"
-import { isNullOrUndefined } from "util";
+import { Player } from './player'
+import { Storable } from '../contracts/Storable'
+import * as _ from 'lodash'
+import { isNullOrUndefined } from 'util'
 
 export class Game implements Storable {
     // server or guild id
-    public guildId: string;
+    public guildId: string
     // channel id
-    public channelId: string;
+    public channelId: string
     // list of player (key userId, except at init where it's shitty)
-    public players = {};
+    public players = {}
     // the states of the dices
     public dices = {
         // player by label instead of user id
         players: {},
         neutral: 0,
-    };
+    }
+    public lang: string
 
     public isValid(): boolean {
-        return !isNullOrUndefined(this.guildId) && !isNullOrUndefined(this.channelId);
+        return !isNullOrUndefined(this.guildId) && !isNullOrUndefined(this.channelId)
     }
 
     public isReady(): boolean {
@@ -75,7 +76,7 @@ export class Game implements Storable {
 
             let newValue = set ? value  : (value + this.dices.players[player.label])
             // avoid overflow and going under 0
-            if (newValue > player.mind || newValue < 0) {
+            if (newValue > player.instinct || newValue < 0) {
                 return false
             }
 
@@ -104,6 +105,10 @@ export class Game implements Storable {
         return available
     }
 
+    public changeLang(lang: string): void {
+        this.lang = lang
+    }
+
     public toStorage(): object {
         let players = [];
         _.forIn(this.players, (player: Player) => players.push(player.toStorage()))
@@ -113,7 +118,7 @@ export class Game implements Storable {
             channelId: this.channelId,
             players: players,
             dices: this.dices,
-        };
+        }
     }
 
     public fromStorage(data) {

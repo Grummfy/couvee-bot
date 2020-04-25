@@ -1,5 +1,6 @@
-
 import * as _ from "lodash"
+import { inject, injectable } from "inversify"
+import { TYPES } from "./types"
 
 let regexParts = [
     // start

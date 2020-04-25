@@ -8,4 +8,5 @@ export const TYPES = {
     Store: Symbol('Store'),
     Prefix: Symbol('Prefix'),
     RandomEngine: Symbol('RandomEngine'),
-};
+    Translator: Symbol('Translator'),
+}

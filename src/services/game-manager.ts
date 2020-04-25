@@ -1,7 +1,7 @@
-import { Store } from "./store"
-import { Game } from "../game/game"
-import * as _ from "lodash"
-import { Message } from "discord.js"
+import { Store } from './store'
+import { Game } from '../game/game'
+import * as _ from 'lodash'
+import { Message } from 'discord.js'
 
 export class GameManager {
     private store: Store
@@ -18,7 +18,7 @@ export class GameManager {
     public getGame(guildId: string, channelId: string): Game {
         let key = this.keyFromIds(guildId, channelId);
         if (_.has(this.games, key)) {
-            return this.games[key];
+            return this.games[key]
         }
         
         /*
@@ -41,7 +41,7 @@ export class GameManager {
     }
 
     public keyFromGame(game: Game): string {
-        return this.keyFromIds(game.guildId, game.channelId);
+        return this.keyFromIds(game.guildId, game.channelId)
     }
 
     public removeGame(game: Game) {
@@ -51,6 +51,6 @@ export class GameManager {
     }
 
     private keyFromIds(guildId: string, channelId: string): string {
-        return guildId + '_' + channelId;
+        return guildId + '_' + channelId
     }
 }

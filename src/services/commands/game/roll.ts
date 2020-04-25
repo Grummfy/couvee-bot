@@ -1,15 +1,15 @@
-import { Message } from "discord.js"
-import { CommandAbstract } from "../../command-abstract"
-import { Engine, shuffle, die } from 'random-js';
-import container from "../../../inversify.config";
-import { TYPES } from "../../../types";
-import { isNullOrUndefined } from "util";
-import * as _ from "lodash"
-import { Game } from "../../../game/game";
-import { Player } from "../../../game/player";
-import { Result } from "@badrap/result";
-import { NiceMessage } from "../../../helper/nice-message";
-import { ErrorMessage } from "../../../helper/error-message";
+import { Message } from 'discord.js'
+import { CommandAbstract } from '../../command-abstract'
+import { Engine, shuffle, die } from 'random-js'
+import container from '../../../inversify.config'
+import { TYPES } from '../../../types'
+import { isNullOrUndefined } from 'util'
+import * as _ from 'lodash'
+import { Game } from '../../../game/game'
+import { Player } from '../../../game/player'
+import { Result } from '@badrap/result'
+import { NiceMessage } from '../../../helper/nice-message'
+import { ErrorMessage } from '../../../helper/error-message'
 
 export class RollGameHandler extends CommandAbstract {
     public name = 'roll'
@@ -39,16 +39,6 @@ export class RollGameHandler extends CommandAbstract {
         this.randomEngine = container.get<Engine>(TYPES.RandomEngine)
     }
 
-    public help(): string {
-        return '**' + this.prefix + this.name + '** will roll some dices, you can combine several possibilities:' + "\n"
-        + '• *X*: roll X neutral dice that are bonus dices' + "\n"
-        + '• *Xg*: roll X random dice taken randomly from the pool of the group' + "\n"
-        + '• *Xn*: roll X neutral dice taken randomly from the pool of the group' + "\n"
-        + '• *Xi*: roll X dice taken from the pool of the group, but only yours (if not enought, will take some ranom dice)' + "\n"
-        + '• *Xg+Yi+Zn+A*: roll X random dice from the pool, Y individual dice, Z neutral dice and A bonus dices' + "\n"
-        + 'When some kind of dice are not available, it will take some randomly... hehe' + "\n"
-    }
-
     public isHandled(message: Message): boolean {
         return super.isHandled(message) || message.content.startsWith(this.prefix + this.name[0] + ' ')
     }
@@ -73,14 +63,11 @@ export class RollGameHandler extends CommandAbstract {
         }
         let requestedDiceToRoll = requestedDicesToRoll.unwrap()
 
-        let msg = 'you ask for some dices: '
-        msg += '***' + requestedDiceToRoll.bonus + '*** bonus dice added, '
-        msg += '**' + requestedDiceToRoll.dices.n + '** neutral dice, '
-        msg += '**' + requestedDiceToRoll.dices.g + '** group dice, '
+        let msg = this.commandHandler.getTranslator().cmd.roll.asked_dices(requestedDiceToRoll.bonus, requestedDiceToRoll.dices.n, requestedDiceToRoll.dices.g)
 
         _.forIn(requestedDiceToRoll.dices.i, (value: number, playerLabel: string) => {
             let playerOfDice = game.playerByLabel(playerLabel)
-            msg += '**' + requestedDiceToRoll.dices.i[ playerLabel ] + '** dice from ' + NiceMessage.notify(playerOfDice.userId) + ', '
+            msg += this.commandHandler.getTranslator().cmd.roll.asked_player_dices(requestedDiceToRoll.dices.i[ playerLabel ], NiceMessage.notify(playerOfDice.userId))
         })
 
         message.reply(msg.slice(0, -2));
@@ -93,13 +80,13 @@ export class RollGameHandler extends CommandAbstract {
         }
         let groupDiceToRoll = groupDice.unwrap()
 
-        msg = 'you picked theses dices that will be rolled: '
+        msg = this.commandHandler.getTranslator().cmd.roll.picked_dices
         if (groupDiceToRoll.n > 0) {
-            msg += groupDiceToRoll.n + ' neutral dice, '
+            msg += this.commandHandler.getTranslator().cmd.roll.picked_neutral_dices(groupDiceToRoll.n)
         }
         _.forIn(groupDiceToRoll.i, (value: number, playerLabel: string) => {
             if (value > 0) {
-                msg += value + ' from ' + NiceMessage.notify(game.playerByLabel(playerLabel).userId) + ', '
+                msg += this.commandHandler.getTranslator().cmd.roll.picked_player_dices(value, NiceMessage.notify(game.playerByLabel(playerLabel).userId))
             }
         })
         message.reply(msg.slice(0, -2));
@@ -133,14 +120,17 @@ export class RollGameHandler extends CommandAbstract {
             game.dices.players[playerLabel] += result.i[playerLabel].filter(value => value >= success).length
         })
 
-        msg = 'we have rolled: ' + "\n"
+        msg = this.commandHandler.getTranslator().cmd.roll.rolled_dices
         if (result.n.length > 0) {
-            msg += neutralSucess + ' [' + result.n.join(', ') + '] as neutral dice' + "\n"
+            msg += this.commandHandler.getTranslator().cmd.roll.rolled_neutral_dices(neutralSucess, result.n.join(', '))
         }
         _.forIn(groupDiceToRoll.i, (value: number, playerLabel: string) => {
             if (result.i[playerLabel].length > 0) {
-                msg += result.i[playerLabel].filter(value => value >= success).length
-                msg += ' [' + result.i[playerLabel].join(', ') + '] from ' + NiceMessage.notify(game.playerByLabel(playerLabel).userId) + "\n"
+                msg += this.commandHandler.getTranslator().cmd.roll.rolled_player_dices(
+                    result.i[playerLabel].filter(value => value >= success).length,
+                    result.i[playerLabel].join(', '),
+                    NiceMessage.notify(game.playerByLabel(playerLabel).userId)
+                )
             }
         })
 
@@ -155,7 +145,7 @@ export class RollGameHandler extends CommandAbstract {
         // check if request is possible
         if (!this.checkRequestedDiceIsPossible(game, requestedDiceToRoll)) {
             // well that's not possible!
-            return Result.err(new Error('Not enought dices available!'))
+            return Result.err(new Error(this.commandHandler.getTranslator().cmd.roll.error.no_dice))
         }
 
         // first take the specificaly requested dice from the pool
@@ -208,7 +198,7 @@ export class RollGameHandler extends CommandAbstract {
         let regex = new RegExp('^' + this.prefix + '(' + this.name + '|' + this.name[0] + ')' + RollGameHandler.regexParts.join(''))
         let matched = message.content.trim().match(regex)
         if (isNullOrUndefined(matched) || isNullOrUndefined(matched.groups)) {
-            return Result.err(new Error('Sorry I didn\'t understand your request'))
+            return Result.err(new Error(this.commandHandler.getTranslator().cmd.roll.error.miss_match))
         }
 
         // extract number of dice to roll

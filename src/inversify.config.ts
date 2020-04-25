@@ -5,9 +5,10 @@ import { Bot } from './bot'
 import { Client } from 'discord.js'
 import { CommandHandler } from './services/command-handler'
 import { Store } from './services/store'
-import { nodeCrypto, Engine } from 'random-js';
+import { nodeCrypto, Engine } from 'random-js'
+import translator from './helper/i18n'
 
-let container = new Container();
+let container = new Container()
 
 container.bind<Bot>(TYPES.Bot).to(Bot).inSingletonScope()
 container.bind<Client>(TYPES.Client).toConstantValue(new Client())
@@ -20,4 +21,6 @@ container.bind<string>(TYPES.Prefix).toConstantValue(process.env.PREFIX)
 nodeCrypto.next()
 container.bind<Engine>(TYPES.RandomEngine).toConstantValue(nodeCrypto)
 
-export default container;
+container.bind(TYPES.Translator).toConstantValue(translator)
+
+export default container

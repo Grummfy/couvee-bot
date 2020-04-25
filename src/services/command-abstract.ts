@@ -1,9 +1,10 @@
-import { Message } from "discord.js";
-import { Command } from "../contracts/Command";
-import { injectable } from "inversify";
-import { CommandHandler } from "./command-handler";
-import { GameManager } from "./game-manager";
-import { Bot } from "../bot";
+import { Message } from 'discord.js'
+import { Command } from '../contracts/Command'
+import { injectable } from 'inversify'
+import { CommandHandler } from './command-handler'
+import { GameManager } from './game-manager'
+import { Bot } from '../bot'
+import { isNullOrUndefined } from 'util'
 
 @injectable()
 export abstract class CommandAbstract implements Command {
@@ -15,7 +16,10 @@ export abstract class CommandAbstract implements Command {
     protected bot: Bot
 
     public help(): string {
-        return this.prefix + this.name + ' do something, but I\'m too lazy to document it!'
+        if (isNullOrUndefined(this.commandHandler.getTranslator().help[ this.name ])) {
+            return this.commandHandler.getTranslator().help['default'](this.prefix + this.name)
+        }
+        return this.commandHandler.getTranslator().help[ this.name ](this.prefix + this.name)
     }
 
     public isHandled(message: Message): boolean {

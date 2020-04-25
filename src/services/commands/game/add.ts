@@ -1,18 +1,11 @@
-import { Message } from "discord.js"
-import { CommandAbstract } from "../../command-abstract"
-import { isNullOrUndefined } from "util"
-import { Result } from "@badrap/result"
-import { ErrorMessage } from "../../../helper/error-message"
+import { Message } from 'discord.js'
+import { CommandAbstract } from '../../command-abstract'
+import { isNullOrUndefined } from 'util'
+import { Result } from '@badrap/result'
+import { ErrorMessage } from '../../../helper/error-message'
 
 export class AddDiceHandler extends CommandAbstract {
     public name = 'add'
-
-    public help(): string {
-        return '**' + this.prefix + this.name + '** will add some dice in the pool:' + "\n"
-        + '• *X i @Y*: X is the number of character dice of player Y(@username) to re-add (within the limit of availibilities)' + "\n"
-        + '• *X i*: X is the number of character dice of yourself to re-add (within the limit of availibilities)' + "\n"
-        + '• *X n*: X is the number of neutral dice to put in the pool of dices' + "\n"
-    }
 
     public handle(message: Message): Promise<Message | Message[]> {
         let game = this.gameManager.getGameFromMessage(message)
@@ -22,7 +15,7 @@ export class AddDiceHandler extends CommandAbstract {
 
         let result = this.extractValues(message)
         if (result.isErr) {
-            return message.reply('Sorry I didn\'t understand your request')
+            return message.reply(this.commandHandler.getTranslator().cmd.add.error.bad_regex)
         }
 
         // handle game change

@@ -1,3 +1,4 @@
+
 export class NiceMessage {
     // discord accept color as numeric value, we coudl use hexadecimal notation instead of base10,
     // it will be more readable... but all code came with non hexadecimal value, that's totally stupid ...

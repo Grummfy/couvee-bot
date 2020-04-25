@@ -1,10 +1,10 @@
-import { Message } from "discord.js";
-import { Command } from "../contracts/Command";
-import { injectable, inject } from "inversify";
-import { Store } from "./store";
-import { Bot } from "../bot";
-import { GameManager } from "./game-manager";
-import { TYPES } from "../types";
+import { Message } from 'discord.js'
+import { Command } from '../contracts/Command'
+import { injectable, inject } from 'inversify'
+import { Store } from './store'
+import { Bot } from '../bot'
+import { GameManager } from './game-manager'
+import { TYPES } from '../types'
 
 /**
  * Communication bus to dispach command alongs the bot
@@ -19,14 +19,18 @@ export class CommandHandler {
 
     private prefix: string
 
+    private translator
+
     public constructor(
         @inject(TYPES.Store) store: Store,
-        @inject(TYPES.Prefix) prefix: string
+        @inject(TYPES.Prefix) prefix: string,
+        @inject(TYPES.Translator) translator
     ) {
         this.handlers = new Array()
         this.store = store
         this.gameManager = new GameManager(this.store)
         this.prefix = prefix
+        this.translator = translator
     }
 
     public addHandler(command: Command, bot: Bot) {
@@ -41,6 +45,10 @@ export class CommandHandler {
 
     public getPrefix(): string {
         return this.prefix
+    }
+
+    public getTranslator() {
+        return this.translator
     }
 
     public handle(message: Message): Promise<Message | Message[]> {

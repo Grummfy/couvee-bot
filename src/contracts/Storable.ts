@@ -1,4 +1,4 @@
 export interface Storable {
-    toStorage(): object;
-    fromStorage(data);
+    toStorage(): object
+    fromStorage(data)
 }

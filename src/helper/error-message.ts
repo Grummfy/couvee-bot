@@ -1,11 +1,23 @@
-import { Message } from "discord.js";
+import { Message } from 'discord.js'
+import { isNullOrUndefined } from 'util'
+import container from '../inversify.config'
+import { TYPES } from '../types'
 
 export class ErrorMessage {
+    private static translator
+
     public static noGameInitilized(message: Message) {
-        return message.reply('No game found, you start a new game with "' + process.env.PREFIX + 'start Xplayer" where X is the number of players.')
+        ErrorMessage.init()
+        return message.reply(ErrorMessage.translator.error.no_game_found)
     }
 
     public static noPlayerFound(message: Message) {
-        return message.reply('No player found...')
+        return message.reply(ErrorMessage.translator.error.no_player_found)
+    }
+
+    private static init() {
+        if (isNullOrUndefined(ErrorMessage.translator)) {
+            ErrorMessage.translator = container.get(TYPES.Translator)
+        }
     }
 }

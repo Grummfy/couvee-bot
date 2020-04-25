@@ -1,11 +1,11 @@
-import { Message, User, MessageReaction, Collection } from "discord.js"
-import { CommandAbstract } from "../../command-abstract"
-import { Game } from "../../../game/game"
-import { Player } from "../../../game/player"
-import { NiceMessage } from "../../../helper/nice-message"
-import * as _ from "lodash"
-import { isNullOrUndefined } from "util"
-import { Result } from "@badrap/result"
+import { Message, User, MessageReaction, Collection } from 'discord.js'
+import { CommandAbstract } from '../../command-abstract'
+import { Game } from '../../../game/game'
+import { Player } from '../../../game/player'
+import { NiceMessage } from '../../../helper/nice-message'
+import * as _ from 'lodash'
+import { isNullOrUndefined } from 'util'
+import { Result } from '@badrap/result'
 
 /**
  * Command to start a game:
@@ -17,12 +17,6 @@ import { Result } from "@badrap/result"
 export class StartGameHandler extends CommandAbstract {
     public name = 'start'
 
-    public help(): string {
-        return '**' + this.prefix + this.name + ' Xplayer** start the game for X players.' + "\n"
-        + 'Once started, each player must choose one smiley from the available reactions.' + "\n"
-        + 'Then the bot will ask for the mind value of each of them.' + "\n"
-    }
-
     public handle(message: Message): Promise<Message | Message[]> {
         // get the number of player in the game
         let regex = new RegExp('^' + this.prefix + this.name + ' ((p|player) ?(?<player1>[0-9]*)|(?<player2>[0-9]*) ?(p|player))$')
@@ -30,7 +24,7 @@ export class StartGameHandler extends CommandAbstract {
         let matched = message.content.match(regex)
         let numberOfPlayer = 0
         let reactions = {}
-        let valueStart = "😁".codePointAt(0)
+        let valueStart = '😁'.codePointAt(0)
         if (!matched) {
             return message.reply('arghhhhhh....' + "\n\n" + this.help())
         }
@@ -42,15 +36,13 @@ export class StartGameHandler extends CommandAbstract {
             numberOfPlayer = Number.parseInt(matched.groups.player2)
         }
 
+        // 15 is randomly choosen, it's just a number to have a limit
         if (numberOfPlayer <= 0 || numberOfPlayer > 15) {
-            return message.reply('arghh, the number of player is inadequat!')
+            return message.reply(this.commandHandler.getTranslator().cmd.start.error.max_players)
         }
 
         let game = new Game();
-        let msg = [
-            'Click on the reaction emoji to be associate to a player',
-            'Players: ',
-        ];
+        let msg: string[] = this.commandHandler.getTranslator().cmd.start.react;
 
         // define players & player dice
         for (let i = 1; i <= numberOfPlayer; i++) {
@@ -110,7 +102,7 @@ export class StartGameHandler extends CommandAbstract {
                         message.reactions.removeAll().catch(console.error)
 
                         // ask to each player the cci
-                        this.processMindValue(game, message)
+                        this.processInstinctValue(game, message)
                     }
                 });
 
@@ -138,15 +130,13 @@ export class StartGameHandler extends CommandAbstract {
                     let result = this.checkAllPlayersAssociated(game)
                     if (result.isErr) {
                         let msg = NiceMessage.wrap(
-                            'It appears some players have not been choose "' +
-                            result.error.val.join(', ') + "\n" +
-                            'Please restart the selection 😭',
+                            this.commandHandler.getTranslator().cmd.start.error.missing_players(result.error.val.join(', ')),
                             NiceMessage.ERROR
                         )
 
                         if (result.error.val.length == 0) {
                             msg = NiceMessage.wrap(
-                                'Some nasty player take two, so you need to restart the selection 😭',
+                                this.commandHandler.getTranslator().cmd.start.error.two_player_on_same_reaction,
                                 NiceMessage.ERROR
                             )
                         }
@@ -165,7 +155,7 @@ export class StartGameHandler extends CommandAbstract {
         return reply;
     }
 
-    private processMindValue(game: Game, message: Message) {
+    private processInstinctValue(game: Game, message: Message) {
         let userIds = []
         let msg = _.values(game.players).map((player: Player) => {
             userIds.push(player.userId)
@@ -173,8 +163,8 @@ export class StartGameHandler extends CommandAbstract {
         })
         this.gameManager.setGame(game)
         message.channel
-            .send(NiceMessage.wrap('Please ' + msg.join(',') + '. Give me your mind value for the CCi', NiceMessage.QUESTION))
-            .then(() => this.updateMindFromResponse(userIds, message, game))
+            .send(NiceMessage.wrap(this.commandHandler.getTranslator().cmd.start.ask_instinct(msg.join(',')), NiceMessage.QUESTION))
+            .then(() => this.updateInstinctFromResponse(userIds, message, game))
     }
 
     private associatePlayerFromEmoji(reactions: {}, emoji: string, game: Game, user: User) {
@@ -192,33 +182,33 @@ export class StartGameHandler extends CommandAbstract {
         }
     }
 
-    private updateMindFromResponse(userIds: string[], message: Message, game: Game): void {
-        // take all next response and update mind
+    private updateInstinctFromResponse(userIds: string[], message: Message, game: Game): void {
+        // take all next response and update instinct
         const filter = m => userIds.includes(m.author.id);
         message.channel.awaitMessages(filter, { time: 60000, max: userIds.length, errors: ['time'] })
             .then(messages => {
                 messages.each((message: Message) => {
-                    let mind = parseInt(message.content);
-                    if (isNaN(mind)) {
+                    let instinct = parseInt(message.content);
+                    if (isNaN(instinct)) {
                         // skip ;)
                         return;
                     }
 
                     let player = game.playerByUserId(message.author.id)
                     if (player) {
-                        player.mind = mind;
-                        game.modifyDiceNumber('i', mind, player.userId, true)
+                        player.instinct = instinct;
+                        game.modifyDiceNumber('i', instinct, player.userId, true)
                     }
                     this.gameManager.setGame(game)
                 });
             })
             .catch(() => {
                 let players = _.values(game.players).filter((player: Player) => {
-                    return isNullOrUndefined(player.mind);
+                    return isNullOrUndefined(player.instinct);
                 });
                 // oops... something was wrong
                 if (players.length > 0) {
-                    message.channel.send(NiceMessage.wrap('Some player didn\'t response properly. Use ' + this.prefix + 'set mind X (X is the value of your mind)', NiceMessage.INFO));
+                    message.channel.send(NiceMessage.wrap(this.commandHandler.getTranslator().cmd.start.set_instinct(this.prefix + 'set'), NiceMessage.INFO));
                 }
             });
     }
@@ -250,10 +240,7 @@ export class StartGameHandler extends CommandAbstract {
 
             message.channel.send(
                 NiceMessage.wrap(
-                    'It appears several player choose the same reaction "' +
-                    reaction.emoji.name +
-                    '"... ' + mentions.join(', ') + "\n" +
-                    'Please select only one!',
+                    this.commandHandler.getTranslator().cmd.error.multiple_reaction_selected(reaction.emoji.name, mentions.join(', ')),
                     NiceMessage.ERROR
                 )
             );
