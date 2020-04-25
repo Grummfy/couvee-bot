@@ -7,4 +7,4 @@ let i18n = {
     fr: i18n_fr,
 }
 
-export default _.defaultsDeep(i18n[ process.env.LANG ], i18n_en)
+export default _.defaultsDeep(i18n[ process.env.BOT_LANG ], i18n_en)
