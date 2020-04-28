@@ -26,6 +26,8 @@ export default {
                 'Clic sur un emoji de réaction pour être associé a un joueur',
                 'Joueurs: ',
             ],
+            ask_instinct: (players: string) => 'Merci ' + players + ' de me fournir ta valeur d\'instinct',
+            set_instinct: (cmd: string) => 'Certains joueurs n\'ont pas pas répondu. Utiliser **' + cmd + ' instinct X** (X est la valeur d\'instinct)',
         },
     }
 };
