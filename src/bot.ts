@@ -15,6 +15,7 @@ import { AddDiceHandler } from './services/commands/game/add'
 import { RemoveDiceHandler } from './services/commands/game/remove'
 import { StatGameHandler } from './services/commands/game/stats'
 import { DevHandler } from './services/commands/game/dev'
+import { CountDownHandler } from './services/commands/game/countdown'
 
 /**
  * Bopt class that handle the message and dispatch to command throught the command handler bus
@@ -80,6 +81,7 @@ export class Bot {
         this.handler.addHandler(new RemoveDiceHandler, this)
         this.handler.addHandler(new StatGameHandler, this)
         this.handler.addHandler(new SetHandler, this)
+        this.handler.addHandler(new CountDownHandler, this)
 
         if (process.env.DEV) {
             this.handler.addHandler(new DevHandler, this)

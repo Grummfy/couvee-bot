@@ -14,6 +14,7 @@ export default {
                 + 'Une fois démarrer, les joueurs doivents choisir une des réactions (smiley) disponible pour s\'associer dans le jeu.' + "\n"
                 + 'Ensuite, le bot, demandera la valeur d\'instinct pour chacun des joueurs.' + "\n",
         remove: (cmd: string) => '**' + cmd + '**: agis de manière similaire à la commande d\'ajout, mais enlève des dès de la pioche.',
+        countdown: (cmd: string) => '**' + cmd + ' X** va créer un compteur de X secondes',
     },
     cmd: {
         stats: {
@@ -28,6 +29,14 @@ export default {
             ],
             ask_instinct: (players: string) => 'Merci ' + players + ' de me fournir ta valeur d\'instinct',
             set_instinct: (cmd: string) => 'Certains joueurs n\'ont pas pas répondu. Utiliser **' + cmd + ' instinct X** (X est la valeur d\'instinct)',
+        },
+        countdown: {
+            error: {
+                bad_regex: 'Désolé, je n\'ai pas compris la demande',
+                no_value: 'Pas une valeur acceptable',
+            },
+            end_timer: 'Plus de temps disponible!',
+            still_time: (time: number) => 'Compte à rebours: ***' + time + '*** restant!',
         },
     }
 };

@@ -30,6 +30,7 @@ export default {
                 + '• *Xi*: roll X dice taken from the pool of the group, but only yours (if not enought, will take some ranom dice)' + "\n"
                 + '• *Xg+Yi+Zn+A*: roll X random dice from the pool, Y individual dice, Z neutral dice and A bonus dices' + "\n"
                 + 'When some kind of dice are not available, it will take some randomly... hehe' + "\n",
+        countdown: (cmd: string) => '**' + cmd + ' X** will create a countdown of X seconds.',
     },
     cmd: {
         about: {
@@ -89,6 +90,14 @@ export default {
             error: {
                 bad_regex: 'Sorry I didn\'t understand your request',
             },
+        },
+        countdown: {
+            error: {
+                bad_regex: 'Sorry I didn\'t understand your request',
+                no_value: 'No value available',
+            },
+            end_timer: 'No time left!',
+            still_time: (time: number) => 'Countdown continue: ***' + time + '*** left!',
         },
     }
 }
