@@ -42,7 +42,9 @@ export class StartGameHandler extends CommandAbstract {
         }
 
         let game = new Game();
-        let msg: string[] = this.commandHandler.getTranslator().cmd.start.react;
+        console.log(this.commandHandler.getTranslator().cmd.start)
+        // XXX we need to slice to avoid object reference passing, this is shit!
+        let msg: string[] = this.commandHandler.getTranslator().cmd.start.react.slice(0);
 
         // define players & player dice
         for (let i = 1; i <= numberOfPlayer; i++) {
