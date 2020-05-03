@@ -4,6 +4,11 @@ require('dotenv').config()
 import container from './inversify.config'
 import { TYPES } from './types'
 import { Bot } from './bot'
+import * as Sentry from '@sentry/node'
+
+if (process.env.SENTRY_DSN) {
+    Sentry.init({ dsn: process.env.SENTRY_DSN })  
+}
 
 let bot = container.get<Bot>(TYPES.Bot)
 
