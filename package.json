@@ -1,6 +1,6 @@
 {
     "name": "couvee-bot",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "Helpfull bot to play with la couvée",
     "main": "dist/server.js",
     "keywords": [
