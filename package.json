@@ -51,7 +51,7 @@
         "debug": "node --inspect=0.0.0.0 dist/server.js",
         "build": "tsc -p tsconfig.json",
         "watch": "tsc -p tsconfig.json -w",
-        "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\""
+        "test": "mocha --exit -r ts-node/register \"tests/**/*.spec.ts\""
     },
     "engines": {
         "node": "12.x",
