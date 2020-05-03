@@ -21,13 +21,17 @@ if (!isNullOrUndefined(process.env.SENTRY_DSN)) {
 
 let bot = container.get<Bot>(TYPES.Bot)
 
-// permission :
-// * add reaction
-// * to remove reaction: read message history + manage message
-// * send messages
-// * add links 
+// permission (see https://discordapp.com/developers/docs/topics/permissions)
+// * 0000000000000000000000001000000 add reaction
+// * 0000000000000000010000000000000 manage message => remove reaction
+// * 1000000000000000000000000000000 manage emoji => add custom emoji
+// * 0000000000000000000100000000000 send message
+// * 0000000000000010000000000000000 read message history => remove reaction
+// * 0000000000000000100000000000000 add link
+//
+// * 1000000000000010110100001000000 => total perms => 1073834048
 
-console.debug('Add the bot to your discord with https://discordapp.com/oauth2/authorize?client_id=' + process.env.CLIENT_ID + '&permissions=92224&scope=bot')
+console.log('Add the bot to your discord with https://discordapp.com/oauth2/authorize?client_id=' + process.env.CLIENT_ID + '&permissions=1073834048&scope=bot')
 
 bot.listen().then(() => {
     console.log('Logged in!')

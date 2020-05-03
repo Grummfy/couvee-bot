@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js'
+import { Client, Message, Channel, Guild } from 'discord.js'
 import { inject, injectable } from 'inversify'
 import { TYPES } from './types'
 import { CommandHandler } from './services/command-handler'
@@ -16,6 +16,8 @@ import { RemoveDiceHandler } from './services/commands/game/remove'
 import { StatGameHandler } from './services/commands/game/stats'
 import { DevHandler } from './services/commands/game/dev'
 import { CountDownHandler } from './services/commands/game/countdown'
+import { NiceMessage } from './helper/nice-message'
+import { isNullOrUndefined } from 'util'
 
 /**
  * Bopt class that handle the message and dispatch to command throught the command handler bus
@@ -45,6 +47,15 @@ export class Bot {
 
         // show help tips
         this.client.on('ready', () => {
+            this.client.guilds.cache.each((guild: Guild) => {
+                if (!isNullOrUndefined(guild.rulesChannel)) {
+                    guild.rulesChannel.send(NiceMessage.wrap('I just restart', NiceMessage.COLOR_ORANGE))
+                }
+                else if (!isNullOrUndefined(guild.systemChannel)) {
+                    guild.systemChannel.send(NiceMessage.wrap('I just restart', NiceMessage.COLOR_ORANGE))
+                }
+            })
+
             this.client.user.setActivity('La Couvée: ' + this.handler.getPrefix() + 'help')
         })
 
@@ -69,8 +80,7 @@ export class Bot {
         return this.client.login(this.token)
     }
 
-    private registerHandler()
-    {
+    private registerHandler() {
         this.handler.addHandler(new HelpHandler, this)
         this.handler.addHandler(new AboutHandler, this)
         this.handler.addHandler(new PingFinder, this)

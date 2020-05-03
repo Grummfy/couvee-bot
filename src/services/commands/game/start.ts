@@ -1,4 +1,4 @@
-import { Message, User, MessageReaction, Collection } from 'discord.js'
+import { Message, User, MessageReaction, Collection, GuildEmoji } from 'discord.js'
 import { CommandAbstract } from '../../command-abstract'
 import { Game } from '../../../game/game'
 import { Player } from '../../../game/player'
@@ -17,14 +17,15 @@ import { Result } from '@badrap/result'
 export class StartGameHandler extends CommandAbstract {
     public name = 'start'
 
-    public handle(message: Message): Promise<Message | Message[]> {
+    private readonly MAX_PLAYERS = 15;
+
+    public async handle(message: Message): Promise<Message | Message[]> {
         // get the number of player in the game
         let regex = new RegExp('^' + this.prefix + this.name + ' ((p|player) ?(?<player1>[0-9]*)|(?<player2>[0-9]*) ?(p|player))$')
 
         let matched = message.content.match(regex)
         let numberOfPlayer = 0
         let reactions = {}
-        let valueStart = '😁'.codePointAt(0)
         if (!matched) {
             return message.reply('arghhhhhh....' + "\n\n" + this.help())
         }
@@ -37,16 +38,17 @@ export class StartGameHandler extends CommandAbstract {
         }
 
         // 15 is randomly choosen, it's just a number to have a limit
-        if (numberOfPlayer <= 0 || numberOfPlayer > 15) {
+        if (numberOfPlayer <= 0 || numberOfPlayer > this.MAX_PLAYERS) {
             return message.reply(this.commandHandler.getTranslator().cmd.start.error.max_players)
         }
 
         let game = new Game();
-        console.log(this.commandHandler.getTranslator().cmd.start)
+
         // XXX we need to slice to avoid object reference passing, this is shit!
         let msg: string[] = this.commandHandler.getTranslator().cmd.start.react.slice(0);
 
         // define players & player dice
+        let emojis = await this.listOfEmojiesAvailaible(message)
         for (let i = 1; i <= numberOfPlayer; i++) {
             let player = new Player();
             player.label = 'player' + i
@@ -57,10 +59,8 @@ export class StartGameHandler extends CommandAbstract {
             game.dices.neutral += 4
             game.dices.players[player.label] = 0
 
-            let emojiValue = Number.parseInt('0x' + (valueStart++).toString(16))
-            let emoji = String.fromCodePoint(emojiValue)
-            reactions[emoji] = player.label
-            msg.push(emoji + ' ' + player.label)
+            reactions[ emojis[i - 1].id ? emojis[i - 1].id : emojis[i - 1].name ] = player.label
+            msg.push(emojis[i - 1].display + ' ' + player.label)
         }
 
         // define source
@@ -81,7 +81,14 @@ export class StartGameHandler extends CommandAbstract {
                 })
 
                 // keep only reaction that we have defined
-                const filter = (reaction: MessageReaction, user: User) => _.has(reactions, reaction.emoji.name) && !user.bot
+                const filter = (reaction: MessageReaction, user: User) => {
+                    let emoji = reaction.emoji.name
+                    if (!isNullOrUndefined(reaction.emoji.id)) {
+                        emoji = reaction.emoji.id
+                    }
+
+                    return _.has(reactions, emoji) && !user.bot
+                }
 
                 // time is in milliseconds
                 // TODO timing in variable
@@ -95,7 +102,12 @@ export class StartGameHandler extends CommandAbstract {
                         return
                     }
 
-                    this.associatePlayerFromEmoji(reactions, reaction.emoji.name, game, user)
+                    let emoji = reaction.emoji.name
+                    if (!isNullOrUndefined(reaction.emoji.id)) {
+                        emoji = reaction.emoji.id
+                    }
+
+                    this.associatePlayerFromEmoji(reactions, emoji, game, user)
 
                     // check if everybody is selected => ask the cci
                     let result = this.checkAllPlayersAssociated(game)
@@ -110,8 +122,13 @@ export class StartGameHandler extends CommandAbstract {
 
                 // handle double click on a reaction
                 collector.on('remove', (reaction: MessageReaction, user: User) => {
+                    let emoji = reaction.emoji.name
+                    if (!isNullOrUndefined(reaction.emoji.id)) {
+                        emoji = reaction.emoji.id
+                    }
+
                     // find player
-                    let playerLabel = reactions[reaction.emoji.name];
+                    let playerLabel = reactions[ emoji ];
 
                     // we search to be sure to not be catched by keys
                     let player = _.values<Player>(game.players).find((player: Player) => player.label === playerLabel)
@@ -239,14 +256,72 @@ export class StartGameHandler extends CommandAbstract {
             let mentions = users.map((user: User) => {
                 return NiceMessage.notify(user.id);
             });
+            
+            let emoji = reaction.emoji.name
+            if (!isNullOrUndefined(reaction.emoji.id)) {
+                emoji = '<:' + reaction.emoji.name + ':' + reaction.emoji.id + '> '
+            }
 
             message.channel.send(
                 NiceMessage.wrap(
-                    this.commandHandler.getTranslator().cmd.error.multiple_reaction_selected(reaction.emoji.name, mentions.join(', ')),
+                    this.commandHandler.getTranslator().cmd.error.multiple_reaction_selected(emoji, mentions.join(', ')),
                     NiceMessage.ERROR
                 )
             );
         });
+    }
+
+    private async listOfEmojiesAvailaible(message: Message): Promise<{ display: string, name: string, id: string }[]> {
+        // create a list of emojies
+        let emojies = []
+        let valueStart = '😁'.codePointAt(0)
+        for (let i = 0; i < this.MAX_PLAYERS; i++) {
+            let emojiValue = Number.parseInt('0x' + (valueStart++).toString(16))
+            emojies[i] = {
+                name: String.fromCodePoint(emojiValue),
+                display: String.fromCodePoint(emojiValue),
+                id: null,
+            }
+        }
+
+        // check emoji exist in guild (aka discord server)
+        message.guild.emojis.cache.each((emoji: GuildEmoji) => {
+            let matched = emoji.name.match(/lacouvee([0-9]*)/)
+            if (isNullOrUndefined(matched)) {
+                return
+            }
+
+            let emojiNumber = Number.parseInt(matched[1])
+            if (Number.isNaN(emojiNumber) || (emojiNumber - 1) < 0) {
+                return
+            }
+
+            emojies[emojiNumber - 1].name = emoji.name
+            emojies[emojiNumber - 1].display = '<:' + emoji.name + ':' + emoji.id + '> '
+            emojies[emojiNumber - 1].id = emoji.id
+        })
+
+        // create missing one
+        // we only got 6 icon => 6 is the limit so ¯\_(ツ)_/¯
+        let promises = []
+        for (let i = 0; i < 6; i++) {
+            if (emojies[i].emojiId === 0) {
+                promises.push(
+                    message.guild.emojis.create(process.cwd() + '/assets/emoji_' + (i + 1) + '.png', 'lacouvee' + (i + 1), { reason: 'bot La Couvée' })
+                        .then((emoji: GuildEmoji) => {
+                            emojies[i].name = emoji.name
+                            emojies[i].display = '<:' + emoji.name + ':' + emoji.id + '> '
+                            emojies[i].id = emoji.id
+                        })
+                        .catch(console.error)
+                )
+            }
+        }
+
+        // wait that all emojies have been created
+        await Promise.all(promises)
+
+        return emojies
     }
 }
 
