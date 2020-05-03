@@ -12,6 +12,7 @@ export class ErrorMessage {
     }
 
     public static noPlayerFound(message: Message) {
+        ErrorMessage.init()
         return message.reply(ErrorMessage.translator.error.no_player_found)
     }
 
