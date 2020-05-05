@@ -3,28 +3,29 @@ import { CommandAbstract } from '../../command-abstract'
 import { isNullOrUndefined } from 'util'
 import { Result } from '@badrap/result'
 import { ErrorMessage } from '../../../helper/error-message'
+import { Game } from '../../../game/game'
 
 export class AddDiceHandler extends CommandAbstract {
     public name = 'add'
 
     public handle(message: Message): Promise<Message | Message[]> {
-        let game = this.gameManager.getGameFromMessage(message)
-        if (!game) {
-            return ErrorMessage.noGameInitilized(message)
-        }
+        return this.gameManager.getGameFromMessageAsync(message)
+            .then((game: Game) => {
+                let result = this.extractValues(message)
+                if (result.isErr) {
+                    return message.reply(this.commandHandler.getTranslator().cmd.add.error.bad_regex)
+                }
 
-        let result = this.extractValues(message)
-        if (result.isErr) {
-            return message.reply(this.commandHandler.getTranslator().cmd.add.error.bad_regex)
-        }
-
-        // handle game change
-        for (let value of result.unwrap()) {
-            game.modifyDiceNumber(value.type, value.value, value.userId, false)
-        }
-        this.gameManager.setGame(game)
-
-        return message.reply('enjoy!')
+                // handle game change
+                for (let value of result.unwrap()) {
+                    game.modifyDiceNumber(value.type, value.value, value.userId, false)
+                }
+                this.gameManager.setGame(game)
+                return message.reply('enjoy!')
+            })
+            .catch(() => {
+                return ErrorMessage.noGameInitilized(message)
+            })
     }
 
     protected extractValues(message: Message): Result<{type: string, value: number, userId: (string | undefined)}[], Error> {

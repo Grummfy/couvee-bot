@@ -46,16 +46,22 @@ export class RollGameHandler extends CommandAbstract {
 
     public handle(message: Message): Promise<Message | Message[]> {
         // get usefull stuff like game & current player
-        let game = this.gameManager.getGameFromMessage(message)
-        if (!game) {
-            return ErrorMessage.noGameInitilized(message)
-        }
+        return this.gameManager.getGameFromMessageAsync(message)
+            .then((game: Game) => {
+                let player = game.playerByUserId(message.author.id)
+                if (!player) {
+                    return ErrorMessage.noPlayerFound(message)
+                }
 
-        let player = game.playerByUserId(message.author.id)
-        if (!player) {
-            return ErrorMessage.noPlayerFound(message)
-        }
+                return this.roll(message, game, player)
+            })
+            .catch(() => {
+                return ErrorMessage.noGameInitilized(message)
+            })
 
+    }
+
+    private roll(message: Message, game: Game, player: Player): Promise<Message | Message[]> {
         //
         // extract requested roll
         let requestedDicesToRoll = this.extractRequestedDices(message, player, game)

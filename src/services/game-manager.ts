@@ -11,27 +11,34 @@ export class GameManager {
         this.store = store;
     }
 
-    public getGameFromMessage(message: Message): Game {
+    public getGameFromMessage(message: Message): Promise<Game> {
         return this.getGame(message.guild.id, message.channel.id)
     }
 
-    public getGame(guildId: string, channelId: string): Game {
+    public getGameFromMessageAsync(message: Message): Promise<Game> {
+        return this.getGame(message.guild.id, message.channel.id)
+    }
+
+    public getGame(guildId: string, channelId: string): Promise<Game> {
         let key = this.keyFromIds(guildId, channelId);
         if (_.has(this.games, key)) {
-            return this.games[key]
+            return new Promise((resolve, reject) => {
+                resolve(this.games[key])
+                return this.games[key]
+            })
         }
         
-        /*
-
-        let game = new Game
-        if (this.store.restore(key, game)) {
-            this.games[key] = game;
-        }
-        return game;
-        // XXX well I don't want a promise here, so we are fuked ...
-        */
-
-        return undefined;
+        let game = new Game()
+        return this.store.restore(key, game)
+            .then((isOk: boolean) => {
+                if (isOk) {
+                    this.games[key] = game
+                }
+                return game
+            })
+            .catch(() => {
+                return game
+            })
     }
 
     public setGame(game: Game) {

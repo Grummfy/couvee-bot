@@ -26,17 +26,25 @@ export class Store {
         this.keyV.delete(key)
     }
 
-    public restore(key: string, storable: Storable): boolean {
+    public restore(key: string, storable: Storable): Promise<boolean> {
         // WXXX yeah a promise, welcome to hellllll
         let data = this.keyV.get(key)
 
         if (!data) {
-            return true
+            return new Promise((resolve, reject) => {
+                    reject(false)
+                    return false
+                }
+            )
         }
 
         // XXX if someone has an idea how to use a static call
-        storable.fromStorage(data)
-
-        return true
+        return data.then((row) => {
+            storable.fromStorage(row)
+            return true
+        })
+        .catch(() => {
+            return false
+        })
     }
 }

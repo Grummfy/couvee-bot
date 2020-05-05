@@ -91,7 +91,6 @@ export class StartGameHandler extends CommandAbstract {
                 }
 
                 // time is in milliseconds
-                // TODO timing in variable
                 const collector = message.createReactionCollector(filter, { time: 60000 });
 
                 // handle click on reaction

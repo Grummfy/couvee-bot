@@ -61,7 +61,10 @@ describe('Command:roll', () => {
         mockedMessageInstance.author = instance(mock(User))
 
         // stub response
-        when(mockedGameManagerClass.getGameFromMessage(mockedMessageInstance)).thenReturn(game)
+        when(mockedGameManagerClass.getGameFromMessageAsync(mockedMessageInstance)).thenReturn(new Promise((resolve) => {
+            resolve(game)
+            return game
+        }))
         when(mockedCommandHandlerClass.getTranslator()).thenReturn(translator)
 
         // init command

@@ -3,6 +3,7 @@ import { CommandAbstract } from '../../command-abstract'
 import { isNullOrUndefined } from 'util'
 import { ErrorMessage } from '../../../helper/error-message'
 import { Result } from '@badrap/result'
+import { Game } from '../../../game/game'
 
 export class SetHandler extends CommandAbstract {
     public name = 'set'
@@ -46,52 +47,55 @@ export class SetHandler extends CommandAbstract {
     }
 
     private setCCi(value: number, userId: (string | undefined), message: Message): Promise<Message | Message[]> {
-        let game = this.gameManager.getGameFromMessage(message)
-        if (!game) {
-            return ErrorMessage.noGameInitilized(message)
-        }
+        return this.gameManager.getGameFromMessageAsync(message)
+            .then((game: Game) => {
+                if (!game.modifyDiceNumber('i', value, isNullOrUndefined(userId) ? message.author.id : userId, true)) {
+                    return this.koMessage(message)
+                }
 
-        if (!game.modifyDiceNumber('i', value, isNullOrUndefined(userId) ? message.author.id : userId, true)) {
-            return this.koMessage(message)
-        }
+                // save value ;)
+                this.gameManager.setGame(game)
 
-        // save value ;)
-        this.gameManager.setGame(game)
-
-        return this.okMessage(message)
+                return this.okMessage(message)
+            })
+            .catch(() => {
+                return ErrorMessage.noGameInitilized(message)
+            })
     }
 
     private setCCn(value: number, message: Message): Promise<Message | Message[]> {
-        let game = this.gameManager.getGameFromMessage(message)
-        if (!game) {
-            return ErrorMessage.noGameInitilized(message)
-        }
+        return this.gameManager.getGameFromMessageAsync(message)
+            .then((game: Game) => {
+                game.modifyDiceNumber('n', value, undefined, true)
 
-        game.modifyDiceNumber('n', value, undefined, true)
+                // save value ;)
+                this.gameManager.setGame(game)
 
-        // save value ;)
-        this.gameManager.setGame(game)
-
-        return this.okMessage(message)
+                return this.okMessage(message)
+            })
+            .catch(() => {
+                return ErrorMessage.noGameInitilized(message)
+            })
     }
 
     private setInstinct(value: number, userId: (string | undefined), message: Message): Promise<Message | Message[]> {
-        let game = this.gameManager.getGameFromMessage(message)
-        if (!game) {
-            return ErrorMessage.noGameInitilized(message)
-        }
+        return this.gameManager.getGameFromMessageAsync(message)
+            .then((game: Game) => {
+                let player = game.playerByUserId(isNullOrUndefined(userId) ? message.author.id : userId)
+                if (!player) {
+                    return ErrorMessage.noPlayerFound(message)
+                }
 
-        let player = game.playerByUserId(isNullOrUndefined(userId) ? message.author.id : userId)
-        if (!player) {
-            return ErrorMessage.noPlayerFound(message)
-        }
+                player.instinct = value
 
-        player.instinct = value
+                // save value ;)
+                this.gameManager.setGame(game)
 
-        // save value ;)
-        this.gameManager.setGame(game)
-
-        return this.okMessage(message)
+                return this.okMessage(message)
+            })
+            .catch(() => {
+                return ErrorMessage.noGameInitilized(message)
+            })
     }
 
     private okMessage(message: Message): Promise<Message> {
