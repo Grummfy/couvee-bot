@@ -141,7 +141,7 @@ export class RollGameHandler extends CommandAbstract {
             }
         })
 
-        return message.reply(msg.slice(0, -1));
+        return message.reply(msg.slice(0, -1))
     }
     
     private extractRequestedDices(message: Message, player: Player, game: Game): Result<GroupOfDiceRequest, Error> {
@@ -159,21 +159,21 @@ export class RollGameHandler extends CommandAbstract {
         requestedDiceToRoll.bonus = matched.groups.bonus ? Number.parseInt(matched.groups.bonus.replace('+', '')) : 0
 
         if (isNaN(requestedDiceToRoll.bonus)) {
-            requestedDiceToRoll.bonus = 0;
+            requestedDiceToRoll.bonus = 0
         }
 
         // TODO extract i from other
 
         // extract dice groups
-        let dices = matched.groups.dices.split('+');
-        let regexDices = new RegExp(RollGameHandler.regexDicesParts.join(''));
+        let dices = matched.groups.dices.replace(' ', '+').split('+')
+        let regexDices = new RegExp(RollGameHandler.regexDicesParts.join(''))
         for (let dice of dices) {
             // trim to avoid exterm blank characters
-            let matchedDice = dice.trim().match(regexDices);
+            let matchedDice = dice.trim().match(regexDices)
             if (matchedDice && matchedDice.groups.group) {
-                let val = matchedDice.groups.value ? Number.parseInt(matchedDice.groups.value) : 0;
+                let val = matchedDice.groups.value ? Number.parseInt(matchedDice.groups.value) : 0
                 if (isNaN(val)) {
-                    val = 0;
+                    val = 0
                 }
 
                 if (matchedDice.groups.group === 'i') {
