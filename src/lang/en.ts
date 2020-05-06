@@ -27,9 +27,10 @@ export default {
                 + '• *X*: roll X neutral dice that are bonus dices' + "\n"
                 + '• *Xg*: roll X random dice taken randomly from the pool of the group' + "\n"
                 + '• *Xn*: roll X neutral dice taken randomly from the pool of the group' + "\n"
-                + '• *Xi*: roll X dice taken from the pool of the group, but only yours (if not enought, will take some ranom dice)' + "\n"
+                + '• *Xi*: roll X dice taken from the pool of the group, but only yours (if not enought, will take some random dice)' + "\n"
+                + '• *Xi @Z*: roll X dice taken from the pool of the group, but only the one from Z (if not enought, will take some random dice)' + "\n"
                 + '• *Xg+Yi+Zn+A*: roll X random dice from the pool, Y individual dice, Z neutral dice and A bonus dices' + "\n"
-                + 'When some kind of dice are not available, it will take some randomly... hehe' + "\n",
+                + 'Example:' + cmd + ' 3g+2i+1i @Andr3w launch 2 of your dices, 1 from the dsicord user called Andr3w and 3 from the pool of dice that will take randomly' + "\n",
         countdown: (cmd: string) => '**' + cmd + ' X** will create a countdown of X seconds.',
     },
     cmd: {
@@ -41,7 +42,7 @@ export default {
                 '',
                 'This bot is an help for the rpg [La Couvée](http://editions-6napse.fr/#product-new-born)'
             ],
-            version: (version: string) => 'Version: ' + version,
+            version: (runtimeVersion: string, packageVersion: string) => 'Version: ' + runtimeVersion + '/'  + packageVersion,
         },
         stats: {
             title: 'Stats about the CC',

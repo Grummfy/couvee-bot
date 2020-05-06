@@ -11,6 +11,7 @@ import { Player } from '../../../../src/game/player'
 import { TYPES } from '../../../../src/types'
 import container from '../../../../src/inversify.config'
 import * as _ from 'lodash'
+import { GroupOfDiceRequest } from '../../../../src/game/dices/GroupOfDiceRequest'
 
 // init container
 require('dotenv').config()
@@ -46,15 +47,15 @@ describe('Command:roll', () => {
         game.channelId = 'channel2'
         game.changeLang('en')
 
-        game.players['playerAbc123'] = new Player()
-        game.players['playerAbc123'].label = 'player1'
-        game.players['playerAbc123'].instinct = game.dices.players['player1'] = 3
-        game.players['playerAbc123'].userId = 'playerAbc123'
+        game.players['0123456789'] = new Player()
+        game.players['0123456789'].label = 'player1'
+        game.players['0123456789'].instinct = game.dices.players['player1'] = 3
+        game.players['0123456789'].userId = '0123456789'
 
-        game.players['playerDef456'] = new Player()
-        game.players['playerDef456'].label = 'player2'
-        game.players['playerDef456'].instinct = game.dices.players['player2'] = 1
-        game.players['playerDef456'].userId = 'playerDef456'
+        game.players['2345678901'] = new Player()
+        game.players['2345678901'].label = 'player2'
+        game.players['2345678901'].instinct = game.dices.players['player2'] = 1
+        game.players['2345678901'].userId = '2345678901'
 
         game.dices.neutral = 8 // 4 * 2 players
 
@@ -97,7 +98,7 @@ describe('Command:roll', () => {
 
         describe('rolling...', async () => {
             beforeEach(() => {
-                mockedMessageInstance.author.id = 'playerAbc123'
+                mockedMessageInstance.author.id = '0123456789'
             })
 
             afterEach(() => {
@@ -135,12 +136,13 @@ describe('Command:roll', () => {
 
                 // check response
                 let response: any = capture(mockedMessageClass.reply).last()
+
                 expect(response.length).to.be.equal(1)
                 expect(_.startsWith(response[0], translator.cmd.roll.rolled_dices)).to.be.true
             })
 
             it('should roll several dices for the given player', async () => {
-                mockedMessageInstance.author.id = 'playerDef456'
+                mockedMessageInstance.author.id = '2345678901'
                 mockedMessageInstance.content = prefix + 'roll 2i' //+1n 2g+3'
 
                 await command.handle(mockedMessageInstance)
@@ -152,8 +154,8 @@ describe('Command:roll', () => {
             })
 
             it('should roll several dices', async () => {
-                // mockedMessageInstance.author.id = 'playerAbc123'
-                mockedMessageInstance.author.id = 'playerDef456'
+                // mockedMessageInstance.author.id = '0123456789'
+                mockedMessageInstance.author.id = '2345678901'
                 mockedMessageInstance.content = prefix + 'roll 2i+1n 2g+3'
 
                 await command.handle(mockedMessageInstance)
@@ -162,6 +164,29 @@ describe('Command:roll', () => {
                 let response: any = capture(mockedMessageClass.reply).last()
                 expect(response.length).to.be.equal(1)
                 expect(_.startsWith(response[0], translator.cmd.roll.rolled_dices)).to.be.true
+            })
+
+            it('should roll several dices from multiple player', async () => {
+                mockedMessageInstance.author.id = '2345678901'
+                mockedMessageInstance.content = prefix + 'roll 1n 2i <@!0123456789>+1i <@!2345678901> 2g+3'
+
+                await command.handle(mockedMessageInstance)
+
+                // check response
+                let response: any = capture(mockedMessageClass.reply).last()
+                expect(response.length).to.be.equal(1)
+                expect(_.startsWith(response[0], translator.cmd.roll.rolled_dices)).to.be.true
+                verify(spiedGame.playerByUserId('0123456789')).once()
+                verify(spiedGame.playerByUserId('2345678901')).twice()
+                let args = capture(spiedGame.getGroupOfDiceToRollFromRequest).last()
+                let requestedDices = new GroupOfDiceRequest()
+                requestedDices.bonus = 3
+                requestedDices.dices.i['player1'] = 2
+                requestedDices.dices.i['player2'] = 1
+                requestedDices.dices.g = 2
+                requestedDices.dices.n = 1
+                expect(_.isEqual(args[0], requestedDices), 'requested dice match the expression')
+
             })
         })
     })

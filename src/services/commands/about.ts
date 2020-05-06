@@ -7,12 +7,11 @@ export class AboutHandler extends CommandAbstract {
     public name = 'about'
 
     public handle(message: Message): Promise<Message | Message[]> {
-        console.log(this.commandHandler.getTranslator())
-        let msg: string[] = this.commandHandler.getTranslator().cmd.about.about
+        let msg: string[] = this.translator.cmd.about.about
 
         if (!isNullOrUndefined(process.env.HEROKU_RELEASE_VERSION)) {
             msg.push('')
-            msg.push(this.commandHandler.getTranslator().cmd.about.version(process.env.HEROKU_RELEASE_VERSION))
+            msg.push(this.translator.cmd.about.version(process.env.HEROKU_RELEASE_VERSION, process.env.npm_package_version))
         }
 
         return message.reply(NiceMessage.wrap(msg.join('\n')))

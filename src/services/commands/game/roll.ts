@@ -3,7 +3,7 @@ import { CommandAbstract } from '../../command-abstract'
 import { Engine, die } from 'random-js'
 import container from '../../../inversify.config'
 import { TYPES } from '../../../types'
-import { isNullOrUndefined } from 'util'
+import { isNullOrUndefined, isNull } from 'util'
 import * as _ from 'lodash'
 import { Game } from '../../../game/game'
 import { Player } from '../../../game/player'
@@ -18,7 +18,7 @@ export class RollGameHandler extends CommandAbstract {
 
     private static readonly regexParts = [
         // cc dices
-        '\\s*(?<dices>(\\+?\\s*([0-9]*)\\s*(g|i|n)\\s*)*)',
+        '\\s*(?<dices>(\\+?\\s*([0-9]*)\\s*(g|i|i\\s?<@!([0-9]*)>|n)\\s*)*)',
         // bonus dices
         '(?<bonus>\\+?\\s*([0-9]*))?',
         // end
@@ -32,6 +32,8 @@ export class RollGameHandler extends CommandAbstract {
         '(?<value>[0-9]*)\\s*',
         // group associated to the value
         '\\s*(?<group>(g|i|n))',
+        // user designed
+        '(?<user>_<@!([0-9]*)>)?',
         '$',
     ]
 
@@ -69,31 +71,30 @@ export class RollGameHandler extends CommandAbstract {
             return message.reply(NiceMessage.wrap(requestedDicesToRoll.error.message, NiceMessage.ERROR))
         }
         let requestedDiceToRoll = requestedDicesToRoll.unwrap()
-
-        let msg = this.commandHandler.getTranslator().cmd.roll.asked_dices(requestedDiceToRoll.bonus, requestedDiceToRoll.dices.n, requestedDiceToRoll.dices.g)
+        let msg = this.translator.cmd.roll.asked_dices(requestedDiceToRoll.bonus, requestedDiceToRoll.dices.n, requestedDiceToRoll.dices.g)
 
         _.forIn(requestedDiceToRoll.dices.i, (value: number, playerLabel: string) => {
             let playerOfDice = game.playerByLabel(playerLabel)
-            msg += this.commandHandler.getTranslator().cmd.roll.asked_player_dices(requestedDiceToRoll.dices.i[ playerLabel ], NiceMessage.notify(playerOfDice.userId))
+            msg += this.translator.cmd.roll.asked_player_dices(requestedDiceToRoll.dices.i[ playerLabel ], NiceMessage.notify(playerOfDice.userId))
         })
 
         message.reply(msg.slice(0, -2));
 
         //
         // take the requested dice to pool of dice to roll 
-        let groupDice = game.getGroupOfDiceToRollFromRequest(requestedDiceToRoll, this.commandHandler.getTranslator(), this.randomEngine)
+        let groupDice = game.getGroupOfDiceToRollFromRequest(requestedDiceToRoll, this.translator, this.randomEngine)
         if (groupDice.isErr) {
             return message.reply(NiceMessage.wrap(groupDice.error.message, NiceMessage.ERROR))
         }
         let groupDiceToRoll = groupDice.unwrap()
 
-        msg = this.commandHandler.getTranslator().cmd.roll.picked_dices
+        msg = this.translator.cmd.roll.picked_dices
         if (groupDiceToRoll.n > 0) {
-            msg += this.commandHandler.getTranslator().cmd.roll.picked_neutral_dices(groupDiceToRoll.n)
+            msg += this.translator.cmd.roll.picked_neutral_dices(groupDiceToRoll.n)
         }
         _.forIn(groupDiceToRoll.i, (value: number, playerLabel: string) => {
             if (value > 0) {
-                msg += this.commandHandler.getTranslator().cmd.roll.picked_player_dices(value, NiceMessage.notify(game.playerByLabel(playerLabel).userId))
+                msg += this.translator.cmd.roll.picked_player_dices(value, NiceMessage.notify(game.playerByLabel(playerLabel).userId))
             }
         })
         message.reply(msg.slice(0, -2));
@@ -127,13 +128,13 @@ export class RollGameHandler extends CommandAbstract {
             game.dices.players[playerLabel] += result.i[playerLabel].filter(value => value >= success).length
         })
 
-        msg = this.commandHandler.getTranslator().cmd.roll.rolled_dices
+        msg = this.translator.cmd.roll.rolled_dices
         if (result.n.length > 0) {
-            msg += this.commandHandler.getTranslator().cmd.roll.rolled_neutral_dices(neutralSucess, result.n.join(', '))
+            msg += this.translator.cmd.roll.rolled_neutral_dices(neutralSucess, result.n.join(', '))
         }
         _.forIn(groupDiceToRoll.i, (value: number, playerLabel: string) => {
             if (result.i[playerLabel].length > 0) {
-                msg += this.commandHandler.getTranslator().cmd.roll.rolled_player_dices(
+                msg += this.translator.cmd.roll.rolled_player_dices(
                     result.i[playerLabel].filter(value => value >= success).length,
                     result.i[playerLabel].join(', '),
                     NiceMessage.notify(game.playerByLabel(playerLabel).userId)
@@ -150,7 +151,7 @@ export class RollGameHandler extends CommandAbstract {
         let regex = new RegExp('^' + this.prefix + '(' + this.name + '|' + this.name[0] + ')' + RollGameHandler.regexParts.join(''))
         let matched = message.content.trim().match(regex)
         if (isNullOrUndefined(matched) || isNullOrUndefined(matched.groups)) {
-            return Result.err(new Error(this.commandHandler.getTranslator().cmd.roll.error.miss_match))
+            return Result.err(new Error(this.translator.cmd.roll.error.miss_match))
         }
 
         // extract number of dice to roll
@@ -162,26 +163,49 @@ export class RollGameHandler extends CommandAbstract {
             requestedDiceToRoll.bonus = 0
         }
 
-        // TODO extract i from other
-
         // extract dice groups
-        let dices = matched.groups.dices.replace(' ', '+').split('+')
+
+        let dices = matched.groups.dices
+            // remove space between mention and i
+            .replace(/i\s</g, 'i_<')
+            // replace space by '+'
+            .replace(/\s/g, '+')
+            // split by type of dices
+            .split('+')
         let regexDices = new RegExp(RollGameHandler.regexDicesParts.join(''))
         for (let dice of dices) {
+            if (dice.length <= 0) {
+                continue
+            }
+
             // trim to avoid exterm blank characters
             let matchedDice = dice.trim().match(regexDices)
-            if (matchedDice && matchedDice.groups.group) {
-                let val = matchedDice.groups.value ? Number.parseInt(matchedDice.groups.value) : 0
-                if (isNaN(val)) {
-                    val = 0
+
+            if (isNull(matchedDice) || !matchedDice.groups.group) {
+                return Result.err(new Error(this.translator.cmd.roll.error.miss_match))
+            }
+
+            let val = matchedDice.groups.value ? Number.parseInt(matchedDice.groups.value) : 0
+            if (isNaN(val)) {
+                val = 0
+            }
+
+            if (matchedDice.groups.group === 'i') {
+                let iPlayer = player
+                if (matchedDice.groups.user) {
+                    // extract user => player
+                    // remove the '_@<!' at start and the '>' at the end
+                    let userId = matchedDice.groups.user.slice(4, -1)
+                    iPlayer = game.playerByUserId(userId)
+                    if (isNullOrUndefined(iPlayer)) {
+                        return Result.err(new Error(this.translator.error.no_player_found))
+                    }
                 }
 
-                if (matchedDice.groups.group === 'i') {
-                    requestedDiceToRoll.dices.i[player.label] = val
-                    continue
-                }
-                requestedDiceToRoll.dices[matchedDice.groups.group] = val
+                requestedDiceToRoll.dices.i[iPlayer.label] = val
+                continue
             }
+            requestedDiceToRoll.dices[matchedDice.groups.group] = val
         }
 
         return Result.ok(requestedDiceToRoll)

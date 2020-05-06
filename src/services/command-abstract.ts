@@ -14,12 +14,13 @@ export abstract class CommandAbstract implements Command {
     protected commandHandler: CommandHandler
     protected gameManager: GameManager
     protected bot: Bot
+    protected translator: any
 
     public help(): string {
-        if (isNullOrUndefined(this.commandHandler.getTranslator().help[ this.name ])) {
-            return this.commandHandler.getTranslator().help['default'](this.prefix + this.name)
+        if (isNullOrUndefined(this.translator.help[ this.name ])) {
+            return this.translator.help['default'](this.prefix + this.name)
         }
-        return this.commandHandler.getTranslator().help[ this.name ](this.prefix + this.name)
+        return this.translator.help[ this.name ](this.prefix + this.name)
     }
 
     public isHandled(message: Message): boolean {
@@ -30,8 +31,9 @@ export abstract class CommandAbstract implements Command {
 
     public registered(commandHandler: CommandHandler, gameManager: GameManager, bot: Bot)
     {
-        this.commandHandler = commandHandler;
-        this.gameManager = gameManager;
-        this.bot = bot;
+        this.commandHandler = commandHandler
+        this.gameManager = gameManager
+        this.bot = bot
+        this.translator = commandHandler.getTranslator()
     }
 }

@@ -14,6 +14,11 @@ export default {
                 + 'Une fois démarrer, les joueurs doivents choisir une des réactions (smiley) disponible pour s\'associer dans le jeu.' + "\n"
                 + 'Ensuite, le bot, demandera la valeur d\'instinct pour chacun des joueurs.' + "\n",
         remove: (cmd: string) => '**' + cmd + '**: agis de manière similaire à la commande d\'ajout, mais enlève des dès de la pioche.',
+        set: (cmd: string) => '**' + cmd + '** défini certaines valeur, tel que:' + "\n"
+                + '• *instinct X @Y*: X est la valeur d\'instinct du perso joué par le joueur, Y est optionelle et est la mention discord du joeur (@username) sans le cas contraire, c\'est vous-même' + "\n"
+                + '• *cci X @Y*: X est la valeur de la cci du perso joué par le joueur, Y est optionelle et est la mention discord du joeur (@username) sans le cas contraire, c\'est vous-même' + "\n"
+                + '• *ccn X*: X est la valeur de ccn du groupe de persos' + "\n",
+        end: (cmd: string) => '**' + cmd + '**: fini le jeu en cours, efface la mémoire et va dormir!',
         countdown: (cmd: string) => '**' + cmd + ' X** va créer un compteur de X secondes',
     },
     cmd: {
