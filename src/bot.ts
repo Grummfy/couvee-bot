@@ -47,7 +47,7 @@ export class Bot {
 
         // show help tips
         this.client.on('ready', () => {
-            this.client.guilds.cache.each((guild: Guild) => {
+   /*         this.client.guilds.cache.each((guild: Guild) => {
                 if (!isNullOrUndefined(guild.rulesChannel)) {
                     guild.rulesChannel.send(NiceMessage.wrap('I just restart', NiceMessage.COLOR_ORANGE))
                 }
@@ -55,7 +55,7 @@ export class Bot {
                     guild.systemChannel.send(NiceMessage.wrap('I just restart', NiceMessage.COLOR_ORANGE))
                 }
             })
-
+*/
             this.client.user.setActivity('La Couvée: ' + this.handler.getPrefix() + 'help')
         })
 
