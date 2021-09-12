@@ -1,0 +1,15 @@
+{
+  "name": "couvee-bot",
+  "description": "Discord bot for the rpg ´la couvée´",
+  "repository": "https://github.com/Grummfy/couvee-bot.git",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "discord", "bot"],
+  "env": {
+    "TOKEN": {
+      "description": "Discord token from https://discordapp.com/developers/applications > new app > bot",
+    },
+    "CLIENT_ID": {
+      "description": "Discord client id from https://discordapp.com/developers/applications > new app > oauth2"
+    }
+  }
+}

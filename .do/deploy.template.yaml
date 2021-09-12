@@ -1,0 +1,23 @@
+spec:
+  name: couvee-bot
+  services:
+    - name: couvee-bot
+      environment_slug: node-js
+      git:
+        branch: main
+        repo_clone_url: https://github.com/Grummfy/couvee-bot.git
+      envs:
+        - key: TOKEN
+          scope: RUN_TIME
+          type: SECRET
+        - key: CLIENT_ID
+          scope: RUN_TIME
+        - key: DB_DSN
+          scope: RUN_TIME
+          value: "sqlite://./couvee.sqlite"
+        - key: PREFIX
+          scope: RUN_TIME
+          value: "!"
+        - key: BOT_LANG
+          scope: RUN_TIME
+          value: "en"

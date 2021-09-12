@@ -54,7 +54,23 @@ Some helpfull ressources
 * https://discordapp.com/developers/docs/
 * https://leovoel.github.io/embed-visualizer/
 
-if you want to host on heroku
+#### Deployment
+
+You will require
+* a oauth client id (CLIENT_ID): from https://discordapp.com/developers/applications > new app > oauth2
+* a token for the bot (TOKEN): from https://discordapp.com/developers/applications > new app > bot
+
+##### Digital Ocean
+
+[![Deploy on DigitalOcean](https://www.deploytodo.com/do-btn-blue-ghost.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/Grummfy/couvee-bot/tree/main&refcode=f334e67637bf)
+
+##### Heroku
+
+[![Deploy on Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Grummfy/couvee-bot/tree/main)
+
+Note, the database is not kept between two redeployment... you will require to handle it yourself. Just configure a database in heropo and fill the DSN properly.
+
+If you want to host on heroku, here is more detail (or click on the big button)
 * https://github.com/AnIdiotsGuide/discordjs-bot-guide/blob/master/other-guides/heroku.md
 * https://devcenter.heroku.com/articles/procfile
 * https://devcenter.heroku.com/articles/dyno-metadata
